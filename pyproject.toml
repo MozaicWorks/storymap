@@ -10,7 +10,7 @@ readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
 authors = [
-    { name = "MozaicWorks", email = "contact@mozaicworks.com" }
+    { name = "MozaicWorks", email = "alex.bolboaca@mozaicworks.com" }
 ]
 keywords = ["user story map", "agile", "product", "markdown"]
 classifiers = [
