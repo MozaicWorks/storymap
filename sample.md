@@ -89,13 +89,13 @@ New user can register with email and password.
 Includes email verification flow.
 See [issue #12](https://github.com/org/repo/issues/12)
 
-+++
+> release
 
 #### Register via SSO [status:: in-progress] [persona:: Dave the Developer] [deadline:: 2026-04-15]
 Support Google and Microsoft OAuth providers.
 See [issue #34](https://github.com/org/repo/issues/34)
 
-+++
+> release
 
 #### Register via SAML [status:: not-started] [persona:: Margie the Manager] [deadline:: 2026-09-01]
 Enterprise SAML 2.0 support for large customers.
@@ -105,18 +105,18 @@ Enterprise SAML 2.0 support for large customers.
 #### Sign in [status:: done]
 Standard email/password login with remember-me option.
 
-+++
+> release
 
 #### Forgot password [status:: done]
 Password reset via email token.
 See [issue #15](https://github.com/org/repo/issues/15)
 
-+++
+> release
 
 #### MFA via TOTP [status:: in-progress] [deadline:: 2026-04-30]
 Time-based one-time password support (Google Authenticator, Authy).
 
-+++
+> release
 
 #### MFA via SMS [status:: not-started] [deadline:: 2026-09-01]
 
@@ -124,13 +124,13 @@ Time-based one-time password support (Google Authenticator, Authy).
 
 #### View and edit profile [status:: done] [persona:: Nina the New User]
 
-+++
+> release
 
 #### Upload avatar [status:: blocked] [persona:: Nina the New User]
 Blocked pending storage provider decision.
 See [JIRA-456](https://jira.example.com/browse/JIRA-456)
 
-+++
+> release
 
 #### Delete account [status:: not-started] [deadline:: 2026-09-01]
 Must comply with GDPR right-to-erasure requirements.
@@ -143,11 +143,11 @@ See [issue #78](https://github.com/org/repo/issues/78)
 #### View project summary [status:: done] [persona:: Margie the Manager]
 High-level status cards showing release progress.
 
-+++
+> release
 
 #### Filter by release [status:: in-progress] [persona:: Margie the Manager] [deadline:: 2026-04-15]
 
-+++
+> release
 
 #### Filter by persona [status:: not-started] [deadline:: 2026-06-01]
 
@@ -158,12 +158,12 @@ High-level status cards showing release progress.
 #### Export to PDF [status:: in-progress] [persona:: Margie the Manager] [deadline:: 2026-04-30]
 One-click PDF export of the current story map view.
 
-+++
+> release
 
 #### Export to CSV [status:: not-started] [persona:: Dave the Developer] [deadline:: 2026-06-01]
 Machine-readable export for backlog import into Jira or GitHub.
 
-+++
+> release
 
 #### Export to PNG [status:: not-started] [deadline:: 2026-09-01]
 
@@ -173,12 +173,12 @@ Machine-readable export for backlog import into Jira or GitHub.
 
 #### Notify on story status change [status:: not-started] [persona:: Margie the Manager]
 
-+++
+> release
 
 #### Daily digest [status:: not-started] [persona:: Margie the Manager] [deadline:: 2026-06-01]
 Optional daily summary email of changes since last digest.
 
-+++
+> release
 
 #### Notify on blocked stories [status:: not-started] [deadline:: 2026-09-01]
 Alert assigned persona when a story is marked as blocked.
@@ -189,10 +189,10 @@ Alert assigned persona when a story is marked as blocked.
 Blocked by front-end architecture decision on state management.
 See [issue #99](https://github.com/org/repo/issues/99)
 
-+++
+> release
 
 #### Mark notifications as read [status:: not-started] [deadline:: 2026-06-01]
 
-+++
+> release
 
 #### Notification preferences [status:: not-started] [deadline:: 2026-09-01]

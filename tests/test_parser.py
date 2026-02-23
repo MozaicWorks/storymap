@@ -47,17 +47,17 @@ API-first mindset.
 #### Sign in [status:: done] [persona:: Margie the Manager]
 User can log in with email and password.
 See [issue #1](https://github.com/org/repo/issues/1)
-+++
+> release
 #### Password reset [status:: in-progress] [deadline:: 2026-03-01]
 ### Profile
 #### Edit profile
-+++
+> release
 #### Upload avatar [status:: blocked]
 Blocked by storage decision.
 ## Reporting
 ### Dashboard
 #### View summary [status:: done]
-+++
+> release
 """
 
 
@@ -276,7 +276,7 @@ class TestParserMapStructure:
 
 
 # ---------------------------------------------------------------------------
-# StorymapParser — release groups (+++ separators)
+# StorymapParser — release groups (> release separators)
 # ---------------------------------------------------------------------------
 
 
@@ -297,7 +297,7 @@ class TestParserReleaseGroups:
             "# Releases\n## R1\n## R2\n\n"
             "# Map\n## A\n### T\n"
             "#### Story 1\n"
-            "+++\n"
+            ">release\n"
             "#### Story 2\n"
         )
         doc = StorymapParser().parse(src)
@@ -310,7 +310,7 @@ class TestParserReleaseGroups:
         src = (
             "# Releases\n## R1\n## R2\n\n"
             "# Map\n## A\n### T\n"
-            "+++\n"
+            ">release\n"
             "#### Story 1\n"
         )
         doc = StorymapParser().parse(src)
@@ -324,7 +324,7 @@ class TestParserReleaseGroups:
             "# Map\n## A\n### T\n"
             "#### Story 1\n"
             "#### Story 2\n"
-            "+++\n"
+            ">release\n"
             "#### Story 3\n"
         )
         doc = StorymapParser().parse(src)
@@ -339,7 +339,7 @@ class TestParserReleaseGroups:
             "# Releases\n## R1\n## R2\n\n"
             "# Map\n## A\n### T\n"
             "#### Story 1\n"
-            "+++\n"
+            ">release\n"
         )
         doc = StorymapParser().parse(src)
         task = doc.activities[0].tasks[0]
@@ -351,7 +351,7 @@ class TestParserReleaseGroups:
             "# Releases\n## R1\n## R2\n\n"
             "# Map\n## A\n"
             "### Task 1\n"
-            "#### S1\n+++\n#### S2\n"
+            "#### S1\n> release\n#### S2\n"
             "### Task 2\n"
             "#### S3\n"
         )
@@ -387,7 +387,7 @@ class TestParserStoryFields:
 
     def test_story_deadline_field(self):
         doc = StorymapParser().parse(FULL)
-        # "Password reset" is in release group 1 (after +++)
+        # "Password reset" is in release group 1 > release)
         story = doc.activities[0].tasks[0].story_groups[1][0]
         assert story.fields["deadline"] == "2026-03-01"
 

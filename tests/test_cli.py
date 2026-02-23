@@ -40,7 +40,7 @@ First public release.
 ### Authentication
 #### Sign in [status:: done] [persona:: Margie the Manager]
 User can log in.
-+++
+> release
 #### Password reset [status:: in-progress]
 ### Profile
 #### Edit profile
@@ -118,23 +118,23 @@ class TestCliBasic:
         assert "." in result.output  # version number contains a dot
 
     def test_missing_input_exits_nonzero(self, runner):
-        result = runner.invoke(main, ["nonexistent.md"])
+        result = runner.invoke(main, ["render", "nonexistent.md"])
         assert result.exit_code != 0
 
     def test_produces_html_output(self, runner, input_file):
-        result = runner.invoke(main, [str(input_file)])
+        result = runner.invoke(main, ["render", str(input_file)])
         assert result.exit_code == 0
         html_out = input_file.with_suffix(".html")
         assert html_out.exists()
 
     def test_html_output_is_valid(self, runner, input_file):
-        runner.invoke(main, [str(input_file)])
+        runner.invoke(main, ["render", str(input_file)])
         html = input_file.with_suffix(".html").read_text()
         assert "<!DOCTYPE html>" in html
         assert "User Management" in html
 
     def test_output_written_to_same_dir_by_default(self, runner, input_file):
-        runner.invoke(main, [str(input_file)])
+        runner.invoke(main, ["render", str(input_file)])
         assert (input_file.parent / "test.html").exists()
 
 
@@ -147,7 +147,7 @@ class TestCliOutputDir:
     def test_custom_output_dir(self, runner, input_file, tmp_path):
         out_dir = tmp_path / "output"
         result = runner.invoke(
-            main, [str(input_file), "--output", str(out_dir)]
+            main, ["render", str(input_file), "--output", str(out_dir)]
         )
         assert result.exit_code == 0
         assert (out_dir / "test.html").exists()
@@ -155,14 +155,14 @@ class TestCliOutputDir:
     def test_creates_output_dir_if_missing(self, runner, input_file, tmp_path):
         out_dir = tmp_path / "new" / "nested" / "dir"
         result = runner.invoke(
-            main, [str(input_file), "--output", str(out_dir)]
+            main, ["render", str(input_file), "--output", str(out_dir)]
         )
         assert result.exit_code == 0
         assert out_dir.exists()
 
     def test_short_output_flag(self, runner, input_file, tmp_path):
         out_dir = tmp_path / "out"
-        result = runner.invoke(main, [str(input_file), "-o", str(out_dir)])
+        result = runner.invoke(main, ["render", str(input_file), "-o", str(out_dir)])
         assert result.exit_code == 0
         assert (out_dir / "test.html").exists()
 
@@ -179,7 +179,7 @@ class TestCliCustomTemplate:
             "<html><body>CUSTOM {{ document.activities[0].name }}</body></html>"
         )
         result = runner.invoke(
-            main, [str(input_file), "--template", str(tmpl)]
+            main, ["render", str(input_file), "--template", str(tmpl)]
         )
         assert result.exit_code == 0
         html = input_file.with_suffix(".html").read_text()
@@ -188,7 +188,7 @@ class TestCliCustomTemplate:
 
     def test_nonexistent_template_exits_nonzero(self, runner, input_file):
         result = runner.invoke(
-            main, [str(input_file), "--template", "nonexistent.html.j2"]
+            main, ["render", str(input_file), "--template", "nonexistent.html.j2"]
         )
         assert result.exit_code != 0
 
@@ -202,7 +202,7 @@ class TestCliColorOverrides:
     def test_status_color_override(self, runner, full_input_file):
         result = runner.invoke(
             main,
-            [str(full_input_file), "--status-colors", "done=#00FF00"],
+            ["render", str(full_input_file), "--status-colors", "done=#00FF00"],
         )
         assert result.exit_code == 0
         html = full_input_file.with_suffix(".html").read_text()
@@ -211,7 +211,7 @@ class TestCliColorOverrides:
     def test_ui_color_override(self, runner, full_input_file):
         result = runner.invoke(
             main,
-            [str(full_input_file), "--ui-colors", "activity=#ABCDEF"],
+            ["render", str(full_input_file), "--ui-colors", "activity=#ABCDEF"],
         )
         assert result.exit_code == 0
         html = full_input_file.with_suffix(".html").read_text()
@@ -220,7 +220,7 @@ class TestCliColorOverrides:
     def test_invalid_color_format_exits_nonzero(self, runner, input_file):
         result = runner.invoke(
             main,
-            [str(input_file), "--status-colors", "doneBROKEN"],
+            ["render", str(input_file), "--status-colors", "doneBROKEN"],
         )
         assert result.exit_code != 0
 
@@ -232,16 +232,78 @@ class TestCliColorOverrides:
 
 class TestCliOutput:
     def test_parsing_message_shown(self, runner, input_file):
-        result = runner.invoke(main, [str(input_file)])
+        result = runner.invoke(main, ["render", str(input_file)])
         assert "Parsing" in result.output
 
     def test_html_success_message_shown(self, runner, input_file):
-        result = runner.invoke(main, [str(input_file)])
+        result = runner.invoke(main, ["render", str(input_file)])
         assert "HTML" in result.output
 
     def test_empty_document_warning(self, runner, tmp_path):
         empty = tmp_path / "empty.md"
         empty.write_text("# Not a storymap file\nJust some text.\n")
-        result = runner.invoke(main, [str(empty)])
+        result = runner.invoke(main, ["render", str(empty)])
         assert result.exit_code == 0
         assert "Warning" in result.output or "empty" in result.output.lower()
+
+
+# ---------------------------------------------------------------------------
+# CLI — init subcommand
+# ---------------------------------------------------------------------------
+
+
+class TestCliInit:
+    def test_creates_default_file(self, runner, tmp_path):
+        with runner.isolated_filesystem(temp_dir=tmp_path):
+            result = runner.invoke(main, ["init"])
+            assert result.exit_code == 0
+            assert Path("storymap.md").exists()
+
+    def test_default_file_contains_skeleton(self, runner, tmp_path):
+        with runner.isolated_filesystem(temp_dir=tmp_path):
+            runner.invoke(main, ["init"])
+            content = Path("storymap.md").read_text()
+            assert "# Releases" in content
+            assert "# Map" in content
+            assert "> release" in content
+
+    def test_default_file_contains_format_comment(self, runner, tmp_path):
+        with runner.isolated_filesystem(temp_dir=tmp_path):
+            runner.invoke(main, ["init"])
+            content = Path("storymap.md").read_text()
+            assert "> release" in content
+            assert "advance" in content.lower()
+
+    def test_creates_named_file(self, runner, tmp_path):
+        with runner.isolated_filesystem(temp_dir=tmp_path):
+            result = runner.invoke(main, ["init", "myproduct.md"])
+            assert result.exit_code == 0
+            assert Path("myproduct.md").exists()
+
+    def test_refuses_to_overwrite_existing_file(self, runner, tmp_path):
+        with runner.isolated_filesystem(temp_dir=tmp_path):
+            Path("storymap.md").write_text("existing content")
+            result = runner.invoke(main, ["init"])
+            assert result.exit_code != 0
+            assert Path("storymap.md").read_text() == "existing content"
+
+    def test_success_message_shown(self, runner, tmp_path):
+        with runner.isolated_filesystem(temp_dir=tmp_path):
+            result = runner.invoke(main, ["init"])
+            assert "storymap.md" in result.output
+
+    def test_next_step_hint_shown(self, runner, tmp_path):
+        with runner.isolated_filesystem(temp_dir=tmp_path):
+            result = runner.invoke(main, ["init"])
+            assert "render" in result.output
+
+    def test_skeleton_is_valid_storymap(self, runner, tmp_path):
+        """The skeleton produced by init should parse without warnings."""
+        with runner.isolated_filesystem(temp_dir=tmp_path):
+            runner.invoke(main, ["init"])
+            from storymap.parser import StorymapParser
+            content = Path("storymap.md").read_text()
+            doc = StorymapParser().parse(content)
+            assert doc.warnings == []
+            assert len(doc.releases) >= 1
+            assert len(doc.activities) >= 1

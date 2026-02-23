@@ -17,6 +17,8 @@ just install
 ## Quick start
 
 ```bash
+storymap init                   # → storymap.md in current directory
+storymap init myproduct.md      # → myproduct.md
 just run mymap.md               # → out/mymap.html
 just run-out mymap.md ./output  # → output/mymap.html
 ```
@@ -24,7 +26,7 @@ just run-out mymap.md ./output  # → output/mymap.html
 Or directly via pipenv:
 
 ```bash
-pipenv run storymap mymap.md --output ./out
+pipenv run storymap render mymap.md --output ./out
 ```
 
 **PDF output:** open the generated HTML in a browser and use print-to-PDF
@@ -36,8 +38,10 @@ automated converter for wide table layouts.
 | Command | Description |
 |---|---|
 | `just install` | Install dependencies and package in editable mode |
-| `just run FILE` | Generate HTML output from a markdown file (→ out/) |
-| `just run-out FILE DIR` | Generate HTML output in a specific directory |
+| `just init` | Create a skeleton storymap.md in current directory |
+| `just init-named FILE` | Create a skeleton with a specific filename |
+| `just run FILE` | Render HTML output from a markdown file (→ out/) |
+| `just run-out FILE DIR` | Render HTML output to a specific directory |
 | `just test` | Run all tests |
 | `just test-v` | Run all tests with verbose output |
 | `just test-module MODULE` | Run tests for one module (e.g. `just test-module parser`) |
@@ -123,17 +127,17 @@ project goals, or other context that makes the PDF self-contained.
 #### Story        (card in a swimlane)
 ```
 
-Stories are grouped into release swimlanes by `---` separators within each
-task. Stories before the first `---` belong to the first release, after the
-first `---` to the second release, and so on.
+Stories are grouped into release swimlanes by `> release` separators within each
+task. Stories before the first `> release` belong to the first release, after the
+first `> release` to the second release, and so on.
 
 ```markdown
 ### Authentication
 #### Sign in          ← Release 1 (MVP)
 #### Remember me      ← Release 1 (MVP)
----
+> release
 #### SSO              ← Release 2 (Beta)
----
+> release
                       ← Release 3 empty for this task
 ```
 
@@ -171,9 +175,23 @@ See [issue #1](https://github.com/org/repo/issues/1)
 ## CLI reference
 
 ```
-Usage: storymap [OPTIONS] INPUT_FILE
+Usage: storymap [OPTIONS] COMMAND [ARGS]...
 
-  Generate a user story map from a markdown INPUT_FILE.
+  Generate user story maps from markdown.
+
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
+
+Commands:
+  init    Create a skeleton storymap markdown file to get started.
+  render  Render a story map markdown INPUT_FILE to HTML.
+```
+
+### storymap render
+
+```
+Usage: storymap render [OPTIONS] INPUT_FILE
 
 Options:
   -o, --output DIR                Output directory. Defaults to the input
@@ -184,6 +202,15 @@ Options:
   --ui-colors KEY=COLOR,...       Override UI colors.
                                   Example: activity=#1565C0,task=#90CAF9
   --help                          Show this message and exit.
+```
+
+### storymap init
+
+```
+Usage: storymap init [OUTPUT_FILE]
+
+  OUTPUT_FILE defaults to storymap.md in the current directory.
+  Refuses to overwrite an existing file.
 ```
 
 ## Customisation
@@ -236,13 +263,7 @@ The `darken` filter is also available: `{{ color | darken }}`.
 
 ## Known limitations
 
-**Do not use `---` inside story descriptions in the `# Map` section.**
-The parser treats `---` as a release boundary regardless of context. If you
-need a horizontal rule inside a story description, use `***` or `___` instead —
-both render identically in HTML and PDF but do not trigger release advancement.
-
-This limitation does not apply to the `# Releases` or `# Personas` sections,
-where `---` renders normally as `<hr>`.
+There are no known format limitations at this time.
 
 ## Development
 

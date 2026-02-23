@@ -10,7 +10,7 @@ Section headings (h1) drive state transitions:
     # Map       → MAP state
 
 Within each state, h2/h3/h4 headings drive entity creation.
-`+++` on a line by itself separates stories into release groups within a task.
+`> release` on its own line separates stories into release groups within a task.
 Descriptions are extracted from raw source lines using token.map offsets,
 preserving the original markdown for downstream rendering.
 
@@ -205,14 +205,18 @@ class StorymapParser:
                             )
                             desc_start = token_end
 
-            elif token.type == "inline" and token.content.strip() == "+++":
+            elif token.type == "blockquote_open":
                 if section == _Section.MAP and current_task is not None:
-                    sep_start = _map_start(token)
-                    sep_end = _map_end(token)
-                    finalize_story(sep_start)
-                    current_release_idx += 1
-                    _ensure_group(current_task, current_release_idx)
-                    desc_start = sep_end
+                    # Check if the blockquote content is "release" (case-insensitive).
+                    # Peek ahead for the inline token containing the text.
+                    content = _blockquote_content(tokens, i)
+                    if content.strip().lower() == "release":
+                        sep_start = _map_start(token)
+                        sep_end = _map_end(token)
+                        finalize_story(sep_start)
+                        current_release_idx += 1
+                        _ensure_group(current_task, current_release_idx)
+                        desc_start = sep_end
 
         # ------------------------------------------------------------------
         # Flush any remaining open entities after the last token.
@@ -225,6 +229,16 @@ class StorymapParser:
 # ---------------------------------------------------------------------------
 # Module-level helpers (pure functions, no state)
 # ---------------------------------------------------------------------------
+
+
+def _blockquote_content(tokens: list, blockquote_open_index: int) -> str:
+    """Return the text content of the first inline token inside a blockquote."""
+    for token in tokens[blockquote_open_index + 1:]:
+        if token.type == "blockquote_close":
+            break
+        if token.type == "inline":
+            return token.content
+    return ""
 
 
 def _heading_content(tokens: list, heading_open_index: int) -> str:

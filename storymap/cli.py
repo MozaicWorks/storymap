@@ -2,15 +2,16 @@
 Command-line interface for storymap.
 
 Usage:
-    storymap input.md
-    storymap input.md --output ./out
-    storymap input.md --template custom.html.j2
-    storymap input.md --status-colors done=#00FF00,blocked=#FF0000
+    storymap render input.md
+    storymap render input.md --output ./out
+    storymap render input.md --template custom.html.j2
+    storymap render input.md --status-colors done=#00FF00,blocked=#FF0000
+    storymap init
+    storymap init myproduct.md
 
 PDF output: open the generated HTML in a browser and use print-to-PDF.
 """
 
-import sys
 from pathlib import Path
 
 import click
@@ -18,6 +19,71 @@ from importlib.metadata import version as pkg_version
 
 from storymap.parser import StorymapParser
 from storymap.renderer import StorymapRenderer
+
+
+_DEFAULT_INIT_FILENAME = "storymap.md"
+
+_SKELETON = """\
+<!--
+  Storymap format quick reference
+  ================================
+  # Product Title         — optional, shown at top of output
+  # Releases              — define swimlane labels (required)
+  # Personas              — UX personas with descriptions (optional)
+  # Map                   — the story map itself (required)
+
+  Map hierarchy:
+    ## Activity           — column group
+    ### Task              — column
+    #### Story [key:: val] — card; supported fields:
+                             [status:: not-started | in-progress | done | blocked]
+                             [persona:: Persona Name]
+                             [deadline:: YYYY-MM-DD]
+
+  Use > release on its own line to advance to the next release swimlane.
+-->
+
+# My Product
+
+Short description of what this product does and who it's for.
+
+# Releases
+
+## MVP
+
+First public release — core functionality only.
+
+## Beta
+
+Invite-only beta with selected users.
+
+# Personas
+
+## Alice the User
+
+- **Role:** End user
+- **Tech level:** Medium
+
+Describe Alice's goals, frustrations, and context here.
+
+# Map
+
+## Core Feature
+
+### Main Task
+
+#### First story [status:: done] [persona:: Alice the User]
+Describe what this story delivers.
+
+> release
+
+#### Second story [status:: in-progress] [deadline:: 2026-06-01]
+Describe what this story delivers.
+
+### Another Task
+
+#### A story [status:: not-started]
+"""
 
 
 def _parse_color_overrides(value: str | None) -> dict[str, str]:
@@ -48,8 +114,13 @@ def _write_html(html: str, output_path: Path) -> None:
     click.echo(f"  ✓ HTML → {output_path}")
 
 
-@click.command()
+@click.group()
 @click.version_option(version=pkg_version("storymap"), prog_name="storymap")
+def main() -> None:
+    """Generate user story maps from markdown."""
+
+
+@main.command()
 @click.argument(
     "input_file",
     type=click.Path(exists=True, dir_okay=False, readable=True, path_type=Path),
@@ -82,29 +153,25 @@ def _write_html(html: str, output_path: Path) -> None:
     metavar="KEY=COLOR,...",
     help="Override UI colors. Example: activity=#1565C0,task=#90CAF9",
 )
-def main(
+def render(
     input_file: Path,
     output_dir: Path | None,
     template_path: Path | None,
     status_colors_str: str | None,
     ui_colors_str: str | None,
 ) -> None:
-    """Generate a user story map from a markdown INPUT_FILE."""
+    """Render a story map markdown INPUT_FILE to HTML."""
 
-    # --- resolve output directory ---
     resolved_output_dir = output_dir or input_file.parent
     resolved_output_dir.mkdir(parents=True, exist_ok=True)
-
     stem = input_file.stem
 
-    # --- parse color overrides ---
     try:
         status_colors = _parse_color_overrides(status_colors_str)
         ui_colors = _parse_color_overrides(ui_colors_str)
     except click.BadParameter as e:
         raise click.ClickException(str(e))
 
-    # --- parse ---
     click.echo(f"Parsing {input_file} …")
     try:
         text = input_file.read_text(encoding="utf-8")
@@ -118,7 +185,6 @@ def main(
     for warning in document.warnings:
         click.echo(f"  ⚠ {warning}")
 
-    # --- render ---
     try:
         html = StorymapRenderer().render(
             document,
@@ -129,5 +195,25 @@ def main(
     except Exception as e:
         raise click.ClickException(f"Failed to render: {e}")
 
-    # --- write output ---
     _write_html(html, resolved_output_dir / f"{stem}.html")
+
+
+@main.command()
+@click.argument(
+    "output_file",
+    default=_DEFAULT_INIT_FILENAME,
+    type=click.Path(dir_okay=False, path_type=Path),
+)
+def init(output_file: Path) -> None:
+    """Create a skeleton storymap markdown file to get started.
+
+    OUTPUT_FILE defaults to storymap.md in the current directory.
+    """
+    if output_file.exists():
+        raise click.ClickException(
+            f"{output_file} already exists. "
+            "Choose a different filename or remove the existing file."
+        )
+    output_file.write_text(_SKELETON, encoding="utf-8")
+    click.echo(f"  ✓ Created {output_file}")
+    click.echo(f"  Edit it, then run: storymap render {output_file}")

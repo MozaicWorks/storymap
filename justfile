@@ -28,15 +28,23 @@ test-v:
 test-module module:
     {{pipenv}} run pytest tests/test_{{module}}.py -v
 
+# Create a skeleton storymap.md in the current directory
+init:
+    {{pipenv}} run storymap init
+
+# Create a skeleton storymap with a specific filename
+init-named file:
+    {{pipenv}} run storymap init {{file}}
+
 # Generate HTML output from a markdown file (→ out/)
 run file:
     mkdir -p {{out_dir}}
-    {{pipenv}} run storymap {{file}} --output {{out_dir}}
+    {{pipenv}} run storymap render {{file}} --output {{out_dir}}
 
 # Generate output in a custom directory
 run-out file dir:
     mkdir -p {{dir}}
-    {{pipenv}} run storymap {{file}} --output {{dir}}
+    {{pipenv}} run storymap render {{file}} --output {{dir}}
 
 # Remove generated out/ folder
 clean:
