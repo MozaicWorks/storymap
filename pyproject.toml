@@ -7,7 +7,7 @@ name = "storymap"
 version = "0.1.0"
 description = "Generate user story maps from markdown"
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
 requires-python = ">=3.11"
 authors = [
     { name = "MozaicWorks", email = "alex.bolboaca@mozaicworks.com" }
@@ -17,7 +17,6 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -27,6 +26,7 @@ classifiers = [
 dependencies = [
     "markdown-it-py>=3.0",
     "jinja2>=3.0",
+    "markupsafe>=2.0",
     "click>=8.0",
 ]
 
@@ -37,6 +37,9 @@ Issues = "https://github.com/mozaicworks/storymap/issues"
 
 [project.scripts]
 storymap = "storymap.cli:main"
+
+[tool.setuptools.packages.find]
+exclude = ["out*", "tests*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
