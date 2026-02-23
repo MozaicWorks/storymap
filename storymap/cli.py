@@ -3,10 +3,11 @@ Command-line interface for storymap.
 
 Usage:
     storymap input.md
-    storymap input.md --format pdf
-    storymap input.md --format both --output ./out
+    storymap input.md --output ./out
     storymap input.md --template custom.html.j2
     storymap input.md --status-colors done=#00FF00,blocked=#FF0000
+
+PDF output: open the generated HTML in a browser and use print-to-PDF.
 """
 
 import sys
@@ -46,30 +47,10 @@ def _write_html(html: str, output_path: Path) -> None:
     click.echo(f"  ✓ HTML → {output_path}")
 
 
-def _write_pdf(html: str, output_path: Path) -> None:
-    try:
-        from weasyprint import HTML
-    except ImportError:
-        raise click.ClickException(
-            "weasyprint is required for PDF output. "
-            "Install it with: pip install weasyprint"
-        )
-    HTML(string=html).write_pdf(str(output_path))
-    click.echo(f"  ✓ PDF  → {output_path}")
-
-
 @click.command()
 @click.argument(
     "input_file",
     type=click.Path(exists=True, dir_okay=False, readable=True, path_type=Path),
-)
-@click.option(
-    "--format", "-f",
-    "output_format",
-    type=click.Choice(["html", "pdf", "both"], case_sensitive=False),
-    default="html",
-    show_default=True,
-    help="Output format.",
 )
 @click.option(
     "--output", "-o",
@@ -101,7 +82,6 @@ def _write_pdf(html: str, output_path: Path) -> None:
 )
 def main(
     input_file: Path,
-    output_format: str,
     output_dir: Path | None,
     template_path: Path | None,
     status_colors_str: str | None,
@@ -144,11 +124,5 @@ def main(
     except Exception as e:
         raise click.ClickException(f"Failed to render: {e}")
 
-    # --- write output(s) ---
-    output_format = output_format.lower()
-
-    if output_format in ("html", "both"):
-        _write_html(html, resolved_output_dir / f"{stem}.html")
-
-    if output_format in ("pdf", "both"):
-        _write_pdf(html, resolved_output_dir / f"{stem}.pdf")
+    # --- write output ---
+    _write_html(html, resolved_output_dir / f"{stem}.html")

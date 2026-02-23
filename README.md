@@ -6,30 +6,55 @@ as a styled HTML page or PDF.
 
 ## Installation
 
-```bash
-pip install storymap
-```
-
-For PDF output, also install [weasyprint](https://weasyprint.org/):
+Requires [pipenv](https://pipenv.pypa.io) and [just](https://github.com/casey/just).
 
 ```bash
-pip install weasyprint
+git clone https://github.com/yourorg/storymap
+cd storymap
+just install
 ```
 
 ## Quick start
 
 ```bash
-storymap mymap.md                   # → mymap.html (same directory)
-storymap mymap.md --format pdf      # → mymap.pdf
-storymap mymap.md --format both     # → mymap.html + mymap.pdf
-storymap mymap.md -o ./output       # → output/mymap.html
+just run mymap.md               # → out/mymap.html
+just run-out mymap.md ./output  # → output/mymap.html
 ```
+
+Or directly via pipenv:
+
+```bash
+pipenv run storymap mymap.md --output ./out
+```
+
+**PDF output:** open the generated HTML in a browser and use print-to-PDF
+(Ctrl+P → Save as PDF). Browser print produces better results than any
+automated converter for wide table layouts.
+
+## Just commands
+
+| Command | Description |
+|---|---|
+| `just install` | Install dependencies and package in editable mode |
+| `just run FILE` | Generate HTML output from a markdown file (→ out/) |
+| `just run-out FILE DIR` | Generate HTML output in a specific directory |
+| `just test` | Run all tests |
+| `just test-v` | Run all tests with verbose output |
+| `just test-module MODULE` | Run tests for one module (e.g. `just test-module parser`) |
+| `just template-path` | Print the path to the bundled default template |
+| `just clean` | Remove the out/ folder |
+| `just clean-build` | Remove build artifacts including egg-info |
+| `just clean-env` | Remove the virtualenv and lock file |
+| `just build` | Build distribution packages (sdist + wheel) |
+| `just publish` | Upload to PyPI |
+| `just publish-test` | Upload to TestPyPI for a dry run |
+| `just release` | Tag, push, and create a GitHub release |
 
 ## Document format
 
 A storymap file is a standard markdown document with four reserved top-level
 sections: `Releases`, `Personas`, `Map`, and optionally any other headings
-you want (they are ignored by the renderer but appear in the PDF).
+you want (they are ignored by the renderer but appear in the HTML output).
 
 ```markdown
 # Releases
@@ -143,11 +168,6 @@ User can log in with email and password.
 See [issue #1](https://github.com/org/repo/issues/1)
 ```
 
-> **Note:** Do not use `---` inside story descriptions — it will be
-> interpreted as a release boundary. Use `***` or `___` for a horizontal
-> rule in descriptions if needed (these are parsed as thematic breaks by
-> markdown but do not trigger release advancement in storymap).
-
 ## CLI reference
 
 ```
@@ -156,7 +176,6 @@ Usage: storymap [OPTIONS] INPUT_FILE
   Generate a user story map from a markdown INPUT_FILE.
 
 Options:
-  -f, --format [html|pdf|both]    Output format.  [default: html]
   -o, --output DIR                Output directory. Defaults to the input
                                   file's directory.
   -t, --template FILE             Path to a custom Jinja2 template (.html.j2).
@@ -194,9 +213,8 @@ Copy the bundled template and modify it:
 
 ```bash
 # find the bundled template
-python -c "import storymap; print(storymap.__file__)"
-# → /path/to/storymap/__init__.py
-# template is at /path/to/storymap/templates/default.html.j2
+just template-path
+# → /path/to/storymap/templates/default.html.j2
 ```
 
 Then render with your custom template:
@@ -216,13 +234,23 @@ The template receives the following context variables:
 
 The `darken` filter is also available: `{{ color | darken }}`.
 
+## Known limitations
+
+**Do not use `---` inside story descriptions in the `# Map` section.**
+The parser treats `---` as a release boundary regardless of context. If you
+need a horizontal rule inside a story description, use `***` or `___` instead —
+both render identically in HTML and PDF but do not trigger release advancement.
+
+This limitation does not apply to the `# Releases` or `# Personas` sections,
+where `---` renders normally as `<hr>`.
+
 ## Development
 
 ```bash
 git clone https://github.com/yourorg/storymap
 cd storymap
-pip install -e ".[dev]"
-pytest
+just install
+just test
 ```
 
 ### Project structure

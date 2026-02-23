@@ -115,7 +115,7 @@ class TestCliBasic:
         result = runner.invoke(main, ["nonexistent.md"])
         assert result.exit_code != 0
 
-    def test_default_format_is_html(self, runner, input_file):
+    def test_produces_html_output(self, runner, input_file):
         result = runner.invoke(main, [str(input_file)])
         assert result.exit_code == 0
         html_out = input_file.with_suffix(".html")
@@ -126,11 +126,6 @@ class TestCliBasic:
         html = input_file.with_suffix(".html").read_text()
         assert "<!DOCTYPE html>" in html
         assert "User Management" in html
-
-    def test_explicit_html_format(self, runner, input_file):
-        result = runner.invoke(main, [str(input_file), "--format", "html"])
-        assert result.exit_code == 0
-        assert input_file.with_suffix(".html").exists()
 
     def test_output_written_to_same_dir_by_default(self, runner, input_file):
         runner.invoke(main, [str(input_file)])

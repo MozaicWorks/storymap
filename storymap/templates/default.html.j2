@@ -261,11 +261,30 @@
     }
 
     /* ------------------------------------------------------------------ */
-    /* Print / PDF                                                           */
+    /* Print                                                                 */
     /* ------------------------------------------------------------------ */
     @media print {
-      body { padding: 0.5rem; background: #FFF; }
+      @page { size: A4 landscape; margin: 1cm; }
+
+      /* preserve background colors on story cards, headers, badges */
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+      body { padding: 0; background: #FFF; font-size: 11px; }
+
+      /* each activity starts on a new page */
+      tr:has(.activity-header) { break-before: page; }
+
+      /* tighten columns */
+      .task-header  { min-width: 100px; width: 120px; }
+      .release-label { min-width: 90px; width: 90px; }
+
+      /* reduce card font to fit more content */
+      .story-card { font-size: 0.72rem; padding: 0.3rem 0.4rem; }
+
+      /* unwrap horizontal scroll */
       .map-wrapper { overflow: visible; }
+
+      /* details open, chevron hidden */
       details { display: block; }
       details > summary::before { display: none; }
     }

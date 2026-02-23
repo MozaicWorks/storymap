@@ -33,16 +33,6 @@ run file:
     mkdir -p {{out_dir}}
     {{pipenv}} run storymap {{file}} --output {{out_dir}}
 
-# Generate PDF output from a markdown file (→ out/)
-run-pdf file:
-    mkdir -p {{out_dir}}
-    {{pipenv}} run storymap {{file}} --format pdf --output {{out_dir}}
-
-# Generate both HTML and PDF from a markdown file (→ out/)
-run-both file:
-    mkdir -p {{out_dir}}
-    {{pipenv}} run storymap {{file}} --format both --output {{out_dir}}
-
 # Generate output in a custom directory
 run-out file dir:
     mkdir -p {{dir}}
