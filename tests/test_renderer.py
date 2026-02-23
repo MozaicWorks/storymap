@@ -326,3 +326,60 @@ class TestRendererCustomTemplate:
             assert "<strong>bold</strong>" in html
         finally:
             os.unlink(path)
+
+
+# ---------------------------------------------------------------------------
+# Renderer — XSS protection
+# ---------------------------------------------------------------------------
+
+
+class TestRendererXSS:
+    def test_script_in_story_name_is_escaped(self):
+        doc = StorymapDocument(
+            releases=[Release(name="MVP")],
+            activities=[Activity(name="A", tasks=[
+                Task(name="T", story_groups=[[
+                    Story(name='<script>alert(1)</script>', fields={})
+                ]])
+            ])]
+        )
+        html = StorymapRenderer().render(doc)
+        assert "<script>alert(1)</script>" not in html
+        assert "&lt;script&gt;" in html
+
+    def test_script_in_activity_name_is_escaped(self):
+        doc = StorymapDocument(
+            releases=[Release(name="MVP")],
+            activities=[Activity(name='<script>alert(1)</script>', tasks=[])]
+        )
+        html = StorymapRenderer().render(doc)
+        assert "<script>alert(1)</script>" not in html
+
+    def test_script_in_story_description_renders_as_html(self):
+        """Inline HTML in descriptions is intentional and should pass through."""
+        doc = StorymapDocument(
+            releases=[Release(name="MVP")],
+            activities=[Activity(name="A", tasks=[
+                Task(name="T", story_groups=[[
+                    Story(
+                        name="S",
+                        description="See <!-- internal note --> for context.",
+                        fields={}
+                    )
+                ]])
+            ])]
+        )
+        html = StorymapRenderer().render(doc)
+        assert "<!-- internal note -->" in html
+
+    def test_script_in_field_value_is_escaped(self):
+        doc = StorymapDocument(
+            releases=[Release(name="MVP")],
+            activities=[Activity(name="A", tasks=[
+                Task(name="T", story_groups=[[
+                    Story(name="S", fields={"status": "<script>x</script>"})
+                ]])
+            ])]
+        )
+        html = StorymapRenderer().render(doc)
+        assert "<script>x</script>" not in html

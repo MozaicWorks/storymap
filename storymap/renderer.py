@@ -12,6 +12,7 @@ override the defaults without touching the template.
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from markupsafe import Markup
 from markdown_it import MarkdownIt
 
 from storymap.model import (
@@ -29,8 +30,8 @@ def _make_render_md() -> callable:
     md = MarkdownIt()
     md.disable("lheading")
 
-    def render_md(text: str) -> str:
-        return md.render(text)
+    def render_md(text: str) -> Markup:
+        return Markup(md.render(text))
 
     return render_md
 
