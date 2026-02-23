@@ -6,7 +6,35 @@ build-backend = "setuptools.build_meta"
 name = "storymap"
 version = "0.1.0"
 description = "Generate user story maps from markdown"
+readme = "README.md"
+license = { text = "MIT" }
 requires-python = ">=3.11"
+authors = [
+    { name = "MozaicWorks", email = "contact@mozaicworks.com" }
+]
+keywords = ["user story map", "agile", "product", "markdown"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
+dependencies = [
+    "markdown-it-py>=3.0",
+    "jinja2>=3.0",
+    "click>=8.0",
+    "weasyprint>=61.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/mozaicworks/storymap"
+Repository = "https://github.com/mozaicworks/storymap"
+Issues = "https://github.com/mozaicworks/storymap/issues"
 
 [project.scripts]
 storymap = "storymap.cli:main"
