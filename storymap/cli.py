@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 import click
+from importlib.metadata import version as pkg_version
 
 from storymap.parser import StorymapParser
 from storymap.renderer import StorymapRenderer
@@ -48,6 +49,7 @@ def _write_html(html: str, output_path: Path) -> None:
 
 
 @click.command()
+@click.version_option(version=pkg_version("storymap"), prog_name="storymap")
 @click.argument(
     "input_file",
     type=click.Path(exists=True, dir_okay=False, readable=True, path_type=Path),
@@ -112,6 +114,9 @@ def main(
 
     if not document.activities and not document.releases:
         click.echo("Warning: document appears empty — no releases or activities found.")
+
+    for warning in document.warnings:
+        click.echo(f"  ⚠ {warning}")
 
     # --- render ---
     try:

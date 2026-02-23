@@ -10,28 +10,22 @@ in the EU and US markets.
 [Product brief](https://docs.example.com/product-brief) · [Miro board](https://miro.com/board/acme)
 
 # Releases
-
 ## Not Planned Yet
-
 Stories that have been identified but not yet assigned to a release.
 
 ## MVP
-
 Core functionality required for the first public launch.
 Targets [Q2 2026 milestone](https://github.com/org/repo/milestone/1).
 
 ## Beta
-
 Invite-only beta with selected enterprise customers.
 Focuses on stability, onboarding, and feedback collection.
 
 ## GA
-
 General availability release.
 Full feature set with polished UX and performance targets met.
 
 # Personas
-
 ## Margie the Manager
 
 - **Age:** 48
@@ -91,42 +85,38 @@ needing to ask a colleague for help every five minutes.
 ### Registration
 
 #### Create account [status:: done] [persona:: Nina the New User]
-
 New user can register with email and password.
 Includes email verification flow.
 See [issue #12](https://github.com/org/repo/issues/12)
 
----
++++
 
 #### Register via SSO [status:: in-progress] [persona:: Dave the Developer] [deadline:: 2026-04-15]
-
 Support Google and Microsoft OAuth providers.
 See [issue #34](https://github.com/org/repo/issues/34)
 
----
++++
 
 #### Register via SAML [status:: not-started] [persona:: Margie the Manager] [deadline:: 2026-09-01]
-
 Enterprise SAML 2.0 support for large customers.
 
 ### Authentication
 
 #### Sign in [status:: done]
-
 Standard email/password login with remember-me option.
----
+
++++
 
 #### Forgot password [status:: done]
-
 Password reset via email token.
 See [issue #15](https://github.com/org/repo/issues/15)
 
----
++++
 
 #### MFA via TOTP [status:: in-progress] [deadline:: 2026-04-30]
-
 Time-based one-time password support (Google Authenticator, Authy).
----
+
++++
 
 #### MFA via SMS [status:: not-started] [deadline:: 2026-09-01]
 
@@ -134,17 +124,15 @@ Time-based one-time password support (Google Authenticator, Authy).
 
 #### View and edit profile [status:: done] [persona:: Nina the New User]
 
----
++++
 
 #### Upload avatar [status:: blocked] [persona:: Nina the New User]
-
 Blocked pending storage provider decision.
 See [JIRA-456](https://jira.example.com/browse/JIRA-456)
 
----
++++
 
 #### Delete account [status:: not-started] [deadline:: 2026-09-01]
-
 Must comply with GDPR right-to-erasure requirements.
 See [issue #78](https://github.com/org/repo/issues/78)
 
@@ -153,13 +141,13 @@ See [issue #78](https://github.com/org/repo/issues/78)
 ### Dashboard
 
 #### View project summary [status:: done] [persona:: Margie the Manager]
-
 High-level status cards showing release progress.
----
+
++++
 
 #### Filter by release [status:: in-progress] [persona:: Margie the Manager] [deadline:: 2026-04-15]
 
----
++++
 
 #### Filter by persona [status:: not-started] [deadline:: 2026-06-01]
 
@@ -168,14 +156,14 @@ High-level status cards showing release progress.
 ### Export
 
 #### Export to PDF [status:: in-progress] [persona:: Margie the Manager] [deadline:: 2026-04-30]
-
 One-click PDF export of the current story map view.
----
+
++++
 
 #### Export to CSV [status:: not-started] [persona:: Dave the Developer] [deadline:: 2026-06-01]
-
 Machine-readable export for backlog import into Jira or GitHub.
----
+
++++
 
 #### Export to PNG [status:: not-started] [deadline:: 2026-09-01]
 
@@ -185,28 +173,26 @@ Machine-readable export for backlog import into Jira or GitHub.
 
 #### Notify on story status change [status:: not-started] [persona:: Margie the Manager]
 
----
++++
 
 #### Daily digest [status:: not-started] [persona:: Margie the Manager] [deadline:: 2026-06-01]
-
 Optional daily summary email of changes since last digest.
----
+
++++
 
 #### Notify on blocked stories [status:: not-started] [deadline:: 2026-09-01]
-
 Alert assigned persona when a story is marked as blocked.
 
 ### In-app Notifications
 
 #### Show notification badge [status:: blocked]
-
 Blocked by front-end architecture decision on state management.
 See [issue #99](https://github.com/org/repo/issues/99)
 
----
++++
 
 #### Mark notifications as read [status:: not-started] [deadline:: 2026-06-01]
 
----
++++
 
 #### Notification preferences [status:: not-started] [deadline:: 2026-09-01]

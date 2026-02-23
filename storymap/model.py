@@ -111,3 +111,4 @@ class StorymapDocument:
     releases: list[Release] = field(default_factory=list)
     personas: list[Persona] = field(default_factory=list)
     activities: list[Activity] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)

@@ -40,7 +40,7 @@ First public release.
 ### Authentication
 #### Sign in [status:: done] [persona:: Margie the Manager]
 User can log in.
----
++++
 #### Password reset [status:: in-progress]
 ### Profile
 #### Edit profile
@@ -110,6 +110,12 @@ class TestCliBasic:
         result = runner.invoke(main, ["--help"])
         assert result.exit_code == 0
         assert "INPUT_FILE" in result.output
+
+    def test_version_flag(self, runner):
+        result = runner.invoke(main, ["--version"])
+        assert result.exit_code == 0
+        assert "storymap" in result.output
+        assert "." in result.output  # version number contains a dot
 
     def test_missing_input_exits_nonzero(self, runner):
         result = runner.invoke(main, ["nonexistent.md"])

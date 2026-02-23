@@ -10,6 +10,7 @@ Section headings (h1) drive state transitions:
     # Map       → MAP state
 
 Within each state, h2/h3/h4 headings drive entity creation.
+`+++` on a line by itself separates stories into release groups within a task.
 Descriptions are extracted from raw source lines using token.map offsets,
 preserving the original markdown for downstream rendering.
 
@@ -150,6 +151,11 @@ class StorymapParser:
                         doc.title = content.strip()
                         section = _Section.TITLE
                         desc_start = token_end
+                    else:
+                        doc.warnings.append(
+                            f"Line {token_start + 1}: unrecognised section "
+                            f"'# {content.strip()}' — ignored."
+                        )
 
                 elif level == 2:
                     if section == _Section.RELEASES:
@@ -165,36 +171,48 @@ class StorymapParser:
                     elif section == _Section.MAP:
                         finalize_activity(token_start)
                         current_activity = Activity(name=content.strip())
-                        # Activities have no description in the format;
-                        # desc_start is set defensively for forward compatibility.
                         desc_start = token_end
 
                 elif level == 3:
                     if section == _Section.MAP:
                         finalize_task(token_start)
-                        current_task = Task(name=content.strip(), story_groups=[[]])
-                        current_release_idx = 0
-                        desc_start = token_end
+                        if current_activity is None:
+                            doc.warnings.append(
+                                f"Line {token_start + 1}: task "
+                                f"'### {content.strip()}' has no parent activity — ignored. "
+                                "Tasks must appear under a '## Activity' heading."
+                            )
+                        else:
+                            current_task = Task(name=content.strip(), story_groups=[[]])
+                            current_release_idx = 0
+                            desc_start = token_end
 
                 elif level == 4:
-                    if section == _Section.MAP and current_task is not None:
-                        finalize_story(token_start)
-                        name, fields = _parse_story_heading(content)
-                        current_story = Story(name=name, fields=fields)
-                        _ensure_group(current_task, current_release_idx)
-                        current_task.story_groups[current_release_idx].append(
-                            current_story
-                        )
-                        desc_start = token_end
+                    if section == _Section.MAP:
+                        if current_task is None:
+                            doc.warnings.append(
+                                f"Line {token_start + 1}: story "
+                                f"'#### {content.strip()}' has no parent task — ignored. "
+                                "Stories must appear under a '### Task' heading."
+                            )
+                        else:
+                            finalize_story(token_start)
+                            name, fields = _parse_story_heading(content)
+                            current_story = Story(name=name, fields=fields)
+                            _ensure_group(current_task, current_release_idx)
+                            current_task.story_groups[current_release_idx].append(
+                                current_story
+                            )
+                            desc_start = token_end
 
-            elif token.type == "hr":
+            elif token.type == "inline" and token.content.strip() == "+++":
                 if section == _Section.MAP and current_task is not None:
-                    hr_start = _map_start(token)
-                    hr_end = _map_end(token)
-                    finalize_story(hr_start)
+                    sep_start = _map_start(token)
+                    sep_end = _map_end(token)
+                    finalize_story(sep_start)
                     current_release_idx += 1
                     _ensure_group(current_task, current_release_idx)
-                    desc_start = hr_end
+                    desc_start = sep_end
 
         # ------------------------------------------------------------------
         # Flush any remaining open entities after the last token.

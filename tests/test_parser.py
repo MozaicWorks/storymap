@@ -47,17 +47,17 @@ API-first mindset.
 #### Sign in [status:: done] [persona:: Margie the Manager]
 User can log in with email and password.
 See [issue #1](https://github.com/org/repo/issues/1)
----
++++
 #### Password reset [status:: in-progress] [deadline:: 2026-03-01]
 ### Profile
 #### Edit profile
----
++++
 #### Upload avatar [status:: blocked]
 Blocked by storage decision.
 ## Reporting
 ### Dashboard
 #### View summary [status:: done]
----
++++
 """
 
 
@@ -276,7 +276,7 @@ class TestParserMapStructure:
 
 
 # ---------------------------------------------------------------------------
-# StorymapParser — release groups (--- separators)
+# StorymapParser — release groups (+++ separators)
 # ---------------------------------------------------------------------------
 
 
@@ -297,7 +297,7 @@ class TestParserReleaseGroups:
             "# Releases\n## R1\n## R2\n\n"
             "# Map\n## A\n### T\n"
             "#### Story 1\n"
-            "---\n"
+            "+++\n"
             "#### Story 2\n"
         )
         doc = StorymapParser().parse(src)
@@ -310,7 +310,7 @@ class TestParserReleaseGroups:
         src = (
             "# Releases\n## R1\n## R2\n\n"
             "# Map\n## A\n### T\n"
-            "---\n"
+            "+++\n"
             "#### Story 1\n"
         )
         doc = StorymapParser().parse(src)
@@ -324,7 +324,7 @@ class TestParserReleaseGroups:
             "# Map\n## A\n### T\n"
             "#### Story 1\n"
             "#### Story 2\n"
-            "---\n"
+            "+++\n"
             "#### Story 3\n"
         )
         doc = StorymapParser().parse(src)
@@ -339,7 +339,7 @@ class TestParserReleaseGroups:
             "# Releases\n## R1\n## R2\n\n"
             "# Map\n## A\n### T\n"
             "#### Story 1\n"
-            "---\n"
+            "+++\n"
         )
         doc = StorymapParser().parse(src)
         task = doc.activities[0].tasks[0]
@@ -351,7 +351,7 @@ class TestParserReleaseGroups:
             "# Releases\n## R1\n## R2\n\n"
             "# Map\n## A\n"
             "### Task 1\n"
-            "#### S1\n---\n#### S2\n"
+            "#### S1\n+++\n#### S2\n"
             "### Task 2\n"
             "#### S3\n"
         )
@@ -387,7 +387,7 @@ class TestParserStoryFields:
 
     def test_story_deadline_field(self):
         doc = StorymapParser().parse(FULL)
-        # "Password reset" is in release group 1 (after ---)
+        # "Password reset" is in release group 1 (after +++)
         story = doc.activities[0].tasks[0].story_groups[1][0]
         assert story.fields["deadline"] == "2026-03-01"
 
@@ -585,3 +585,79 @@ class TestParserTitle:
         )
         doc = StorymapParser().parse(src)
         assert doc.title == "My Product"
+
+
+# ---------------------------------------------------------------------------
+# StorymapParser — warnings
+# ---------------------------------------------------------------------------
+
+
+class TestParserWarnings:
+    def test_no_warnings_for_valid_document(self):
+        doc = StorymapParser().parse(FULL)
+        assert doc.warnings == []
+
+    def test_unrecognised_h1_produces_warning(self):
+        src = (
+            "# My Product\n\n"
+            "# Introduction\nSome text.\n\n"
+            "# Releases\n## MVP\n\n"
+            "# Map\n## A\n### T\n#### S\n"
+        )
+        doc = StorymapParser().parse(src)
+        assert any("Introduction" in w for w in doc.warnings)
+
+    def test_unrecognised_h1_warning_includes_line_number(self):
+        src = (
+            "# My Product\n\n"
+            "# BadSection\n\n"
+            "# Releases\n## MVP\n\n"
+            "# Map\n## A\n### T\n#### S\n"
+        )
+        doc = StorymapParser().parse(src)
+        assert any("BadSection" in w for w in doc.warnings)
+        assert any("Line" in w for w in doc.warnings)
+
+    def test_story_without_task_produces_warning(self):
+        src = (
+            "# Releases\n## MVP\n\n"
+            "# Map\n## Activity\n"
+            "#### Orphan story\n"
+        )
+        doc = StorymapParser().parse(src)
+        assert any("Orphan story" in w for w in doc.warnings)
+        assert any("no parent task" in w for w in doc.warnings)
+
+    def test_task_without_activity_produces_warning(self):
+        src = (
+            "# Releases\n## MVP\n\n"
+            "# Map\n"
+            "### Orphan task\n"
+            "#### Story\n"
+        )
+        doc = StorymapParser().parse(src)
+        assert any("Orphan task" in w for w in doc.warnings)
+        assert any("no parent activity" in w for w in doc.warnings)
+
+    def test_orphaned_story_not_added_to_document(self):
+        src = (
+            "# Releases\n## MVP\n\n"
+            "# Map\n## Activity\n"
+            "#### Orphan story\n"
+        )
+        doc = StorymapParser().parse(src)
+        assert doc.activities[0].tasks == []
+
+    def test_multiple_unrecognised_sections_produce_multiple_warnings(self):
+        src = (
+            "# Releases\n## MVP\n\n"
+            "# Foo\n\n"
+            "# Bar\n\n"
+            "# Map\n## A\n### T\n#### S\n"
+        )
+        doc = StorymapParser().parse(src)
+        assert sum(1 for w in doc.warnings if "ignored" in w) == 2
+
+    def test_warnings_default_to_empty_list(self):
+        doc = StorymapDocument()
+        assert doc.warnings == []

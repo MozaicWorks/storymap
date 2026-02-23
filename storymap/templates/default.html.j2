@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Story Map</title>
+  <title>{{ document.title if document.title else "User Story Map" }}</title>
   <style>
     /* ------------------------------------------------------------------ */
     /* Base                                                                  */
@@ -140,6 +140,16 @@
       border: 2px solid #FAFAFA;
       vertical-align: top;
       padding: 0;
+    }
+
+    /* Activity group separator — right border on last task column */
+    .activity-last-task {
+      border-right: 3px solid #FAFAFA;
+    }
+
+    table.story-map td.activity-last-task,
+    table.story-map th.activity-last-task {
+      border-right: 4px solid #BDBDBD;
     }
 
     /* Activity row */
@@ -365,7 +375,7 @@
         <td class="release-label"></td>
         {% for activity in document.activities %}
           {% for task in activity.tasks %}
-          <th class="task-header">{{ task.name }}</th>
+          <th class="task-header {% if loop.last %}activity-last-task{% endif %}">{{ task.name }}</th>
           {% endfor %}
         {% endfor %}
       </tr>
@@ -377,7 +387,7 @@
         <td class="release-label">{{ release.name }}</td>
         {% for activity in document.activities %}
           {% for task in activity.tasks %}
-          <td class="story-cell">
+          <td class="story-cell {% if loop.last %}activity-last-task{% endif %}">
             {% for story in task.stories_for_release(release_idx) %}
             {% set story_color = story.status_color(status_colors) %}
             <div class="story-card" style="background: {{ story_color }}; border-left-color: {{ story_color | darken }};">
