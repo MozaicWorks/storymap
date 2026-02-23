@@ -41,6 +41,9 @@ _SKELETON = """\
                              [deadline:: YYYY-MM-DD]
 
   Use > release on its own line to advance to the next release swimlane.
+  You can annotate it for readability — the text after "release" is ignored:
+    > release Beta
+    > release end of sprint 3
 -->
 
 # My Product
@@ -75,7 +78,7 @@ Describe Alice's goals, frustrations, and context here.
 #### First story [status:: done] [persona:: Alice the User]
 Describe what this story delivers.
 
-> release
+> release Beta
 
 #### Second story [status:: in-progress] [deadline:: 2026-06-01]
 Describe what this story delivers.

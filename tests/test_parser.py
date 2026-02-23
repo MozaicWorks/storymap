@@ -362,10 +362,43 @@ class TestParserReleaseGroups:
         assert len(t2.story_groups) == 1
         assert t2.story_groups[0][0].name == "S3"
 
+    def test_annotated_separator_is_recognised(self):
+        src = (
+            "# Releases\n## R1\n## R2\n\n"
+            "# Map\n## A\n### T\n"
+            "#### Story 1\n"
+            "> release R2\n"
+            "#### Story 2\n"
+        )
+        doc = StorymapParser().parse(src)
+        task = doc.activities[0].tasks[0]
+        assert len(task.story_groups) == 2
+        assert task.story_groups[1][0].name == "Story 2"
 
-# ---------------------------------------------------------------------------
-# StorymapParser — story fields and descriptions
-# ---------------------------------------------------------------------------
+    def test_annotated_separator_with_longer_label(self):
+        src = (
+            "# Releases\n## R1\n## R2\n\n"
+            "# Map\n## A\n### T\n"
+            "#### Story 1\n"
+            "> release end of sprint 3\n"
+            "#### Story 2\n"
+        )
+        doc = StorymapParser().parse(src)
+        task = doc.activities[0].tasks[0]
+        assert len(task.story_groups) == 2
+
+    def test_annotated_separator_case_insensitive(self):
+        src = (
+            "# Releases\n## R1\n## R2\n\n"
+            "# Map\n## A\n### T\n"
+            "#### Story 1\n"
+            "> Release MVP\n"
+            "#### Story 2\n"
+        )
+        doc = StorymapParser().parse(src)
+        task = doc.activities[0].tasks[0]
+        assert len(task.story_groups) == 2
+
 
 
 class TestParserStoryFields:

@@ -210,7 +210,7 @@ class StorymapParser:
                     # Check if the blockquote content is "release" (case-insensitive).
                     # Peek ahead for the inline token containing the text.
                     content = _blockquote_content(tokens, i)
-                    if content.strip().lower() == "release":
+                    if content.strip().lower().startswith("release"):
                         sep_start = _map_start(token)
                         sep_end = _map_end(token)
                         finalize_story(sep_start)

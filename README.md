@@ -131,13 +131,15 @@ Stories are grouped into release swimlanes by `> release` separators within each
 task. Stories before the first `> release` belong to the first release, after the
 first `> release` to the second release, and so on.
 
+You can annotate the separator for readability — anything after `release` is ignored:
+
 ```markdown
 ### Authentication
 #### Sign in          ← Release 1 (MVP)
 #### Remember me      ← Release 1 (MVP)
-> release
+> release Beta
 #### SSO              ← Release 2 (Beta)
-> release
+> release GA
                       ← Release 3 empty for this task
 ```
 
