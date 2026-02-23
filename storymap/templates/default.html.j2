@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Story Map</title>
+  <style>
+    /* ------------------------------------------------------------------ */
+    /* Base                                                                  */
+    /* ------------------------------------------------------------------ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 13px;
+      color: #212121;
+      background: #FAFAFA;
+      padding: 2rem;
+    }
+
+    h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+    h2 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+    h3 { font-size: 1rem; margin-bottom: 0.25rem; }
+
+    a { color: #1565C0; }
+
+    /* ------------------------------------------------------------------ */
+    /* Section headings                                                      */
+    /* ------------------------------------------------------------------ */
+    .section-heading {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #424242;
+      margin: 2rem 0 1rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 2px solid #E0E0E0;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Personas                                                              */
+    /* ------------------------------------------------------------------ */
+    .personas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .persona-card {
+      background: #FFFFFF;
+      border: 1px solid #E0E0E0;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      min-width: 220px;
+      max-width: 340px;
+      flex: 1;
+    }
+
+    .persona-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      color: #1565C0;
+    }
+
+    .persona-card img {
+      max-width: 100%;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+
+    .persona-card ul { padding-left: 1.2rem; }
+    .persona-card li { margin-bottom: 0.2rem; }
+    .persona-card p  { margin-bottom: 0.4rem; line-height: 1.5; }
+
+    /* ------------------------------------------------------------------ */
+    /* Releases summary                                                      */
+    /* ------------------------------------------------------------------ */
+    .releases {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .release-card {
+      background: #FFFFFF;
+      border: 1px solid #E0E0E0;
+      border-left: 4px solid {{ ui_colors.release_header }};
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      min-width: 180px;
+      flex: 1;
+    }
+
+    .release-card h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: {{ ui_colors.release_text }};
+      margin-bottom: 0.4rem;
+    }
+
+    .release-card p { line-height: 1.5; }
+
+    /* ------------------------------------------------------------------ */
+    /* Map table                                                             */
+    /* ------------------------------------------------------------------ */
+    .map-wrapper {
+      overflow-x: auto;
+      margin-top: 1rem;
+    }
+
+    table.story-map {
+      border-collapse: collapse;
+      min-width: 100%;
+      table-layout: fixed;
+    }
+
+    table.story-map td,
+    table.story-map th {
+      border: 2px solid #FAFAFA;
+      vertical-align: top;
+      padding: 0;
+    }
+
+    /* Activity row */
+    .activity-header {
+      background: {{ ui_colors.activity }};
+      color: {{ ui_colors.activity_text }};
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 0.5rem 0.75rem;
+      text-align: center;
+      letter-spacing: 0.03em;
+    }
+
+    /* Task row */
+    .task-header {
+      background: {{ ui_colors.task }};
+      color: {{ ui_colors.task_text }};
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 0.4rem 0.6rem;
+      text-align: center;
+      min-width: 140px;
+      width: 160px;
+    }
+
+    /* Release swimlane label */
+    .release-label {
+      background: {{ ui_colors.release_header }};
+      color: {{ ui_colors.release_text }};
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 0.4rem 0.6rem;
+      white-space: nowrap;
+      width: 120px;
+      min-width: 120px;
+      vertical-align: middle;
+    }
+
+    /* Story cell */
+    .story-cell {
+      background: #FFFFFF;
+      padding: 0.3rem;
+      vertical-align: top;
+    }
+
+    /* Story card */
+    .story-card {
+      border-radius: 4px;
+      padding: 0.5rem 0.6rem;
+      margin-bottom: 0.3rem;
+      border-left: 4px solid transparent;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .story-card:last-child { margin-bottom: 0; }
+
+    .story-name {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .story-description p  { margin-bottom: 0.25rem; }
+    .story-description ul { padding-left: 1.1rem; }
+
+    .story-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.35rem;
+    }
+
+    .story-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      background: rgba(0,0,0,0.08);
+      color: #424242;
+      font-weight: 500;
+    }
+
+    .story-badge.status {
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Print / PDF                                                           */
+    /* ------------------------------------------------------------------ */
+    @media print {
+      body { padding: 0.5rem; background: #FFF; }
+      .map-wrapper { overflow: visible; }
+    }
+  </style>
+</head>
+<body>
+
+  {# -------------------------------------------------------------------- #}
+  {# Releases                                                               #}
+  {# -------------------------------------------------------------------- #}
+  {% if document.releases %}
+  <h2 class="section-heading">Releases</h2>
+  <div class="releases">
+    {% for release in document.releases %}
+    <div class="release-card">
+      <h3>{{ release.name }}</h3>
+      {% if release.description %}
+      <div class="release-description">{{ render_md(release.description) }}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# -------------------------------------------------------------------- #}
+  {# Personas                                                               #}
+  {# -------------------------------------------------------------------- #}
+  {% if document.personas %}
+  <h2 class="section-heading">Personas</h2>
+  <div class="personas">
+    {% for persona in document.personas %}
+    <div class="persona-card">
+      <h3>{{ persona.name }}</h3>
+      {% if persona.description %}
+      <div class="persona-description">{{ render_md(persona.description) }}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# -------------------------------------------------------------------- #}
+  {# Story Map                                                              #}
+  {# -------------------------------------------------------------------- #}
+  {% if document.activities %}
+  <h2 class="section-heading">Map</h2>
+  <div class="map-wrapper">
+    <table class="story-map">
+
+      {# Activity row #}
+      <tr>
+        <td class="release-label"></td>
+        {% for activity in document.activities %}
+        <th class="activity-header" colspan="{{ activity.tasks | length }}">
+          {{ activity.name }}
+        </th>
+        {% endfor %}
+      </tr>
+
+      {# Task row #}
+      <tr>
+        <td class="release-label"></td>
+        {% for activity in document.activities %}
+          {% for task in activity.tasks %}
+          <th class="task-header">{{ task.name }}</th>
+          {% endfor %}
+        {% endfor %}
+      </tr>
+
+      {# Release swimlane rows #}
+      {% for release in document.releases %}
+      {% set release_idx = loop.index0 %}
+      <tr>
+        <td class="release-label">{{ release.name }}</td>
+        {% for activity in document.activities %}
+          {% for task in activity.tasks %}
+          <td class="story-cell">
+            {% for story in task.stories_for_release(release_idx) %}
+            {% set story_color = story.status_color(status_colors) %}
+            <div class="story-card" style="background: {{ story_color }}; border-left-color: {{ story_color | darken }};">
+              <div class="story-name">{{ story.name }}</div>
+              {% if story.description %}
+              <div class="story-description">{{ render_md(story.description) }}</div>
+              {% endif %}
+              {% set meta_fields = story.fields | reject_key("status") %}
+              {% if story.fields or meta_fields %}
+              <div class="story-meta">
+                <span class="story-badge status" style="background: {{ story_color | darken }};">
+                  {{ story.status() }}
+                </span>
+                {% if story.fields.get("persona") %}
+                <span class="story-badge">👤 {{ story.fields.get("persona") }}</span>
+                {% endif %}
+                {% if story.fields.get("deadline") %}
+                <span class="story-badge">📅 {{ story.fields.get("deadline") }}</span>
+                {% endif %}
+                {% for key, value in story.fields.items() %}
+                  {% if key not in ("status", "persona", "deadline") %}
+                  <span class="story-badge">{{ key }}: {{ value }}</span>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </td>
+          {% endfor %}
+        {% endfor %}
+      </tr>
+      {% endfor %}
+
+    </table>
+  </div>
+  {% endif %}
+
+</body>
+</html>
