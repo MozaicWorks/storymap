@@ -91,19 +91,25 @@ Margie manages a team of 8 and primarily accesses the app on her phone.
 #### Sign in [status:: done] [persona:: Margie the Manager]
 User can log in with email and password.
 See [issue #1](https://github.com/org/repo/issues/1)
----
+
+> release Beta
+
 #### Password reset [status:: in-progress] [deadline:: 2026-03-01]
 
 ### Profile
 #### Edit profile [status:: done]
----
+
+> release Beta
+
 #### Upload avatar [status:: blocked]
 Blocked pending storage provider decision.
 
 ## Reporting
 ### Dashboard
 #### View summary [status:: not-started] [persona:: Margie the Manager]
----
+
+> release Beta
+
 #### Export to CSV [deadline:: 2026-06-01]
 ```
 
@@ -165,7 +171,7 @@ the format forward-compatible with future additions.
 ### Story descriptions
 
 Markdown content following a `#### Story` heading and before the next
-heading or `---` separator is treated as the story description. Descriptions
+heading or `> release` separator is treated as the story description. Descriptions
 support standard markdown: bold, italics, links, lists.
 
 ```markdown
