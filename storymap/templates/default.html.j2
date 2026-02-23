@@ -209,11 +209,46 @@
     }
 
     /* ------------------------------------------------------------------ */
+    /* Collapsible sections                                                  */
+    /* ------------------------------------------------------------------ */
+    details { margin-bottom: 2rem; }
+
+    details > summary {
+      list-style: none;
+      cursor: pointer;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #424242;
+      margin: 2rem 0 1rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 2px solid #E0E0E0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    details > summary::-webkit-details-marker { display: none; }
+
+    details > summary::before {
+      content: "▶";
+      font-size: 0.75rem;
+      color: #9E9E9E;
+      transition: transform 0.15s ease;
+      display: inline-block;
+    }
+
+    details[open] > summary::before {
+      transform: rotate(90deg);
+    }
+
+    /* ------------------------------------------------------------------ */
     /* Print / PDF                                                           */
     /* ------------------------------------------------------------------ */
     @media print {
       body { padding: 0.5rem; background: #FFF; }
       .map-wrapper { overflow: visible; }
+      details { display: block; }
+      details > summary::before { display: none; }
     }
   </style>
 </head>
@@ -223,7 +258,8 @@
   {# Releases                                                               #}
   {# -------------------------------------------------------------------- #}
   {% if document.releases %}
-  <h2 class="section-heading">Releases</h2>
+  <details open>
+  <summary>Releases</summary>
   <div class="releases">
     {% for release in document.releases %}
     <div class="release-card">
@@ -234,13 +270,15 @@
     </div>
     {% endfor %}
   </div>
+  </details>
   {% endif %}
 
   {# -------------------------------------------------------------------- #}
   {# Personas                                                               #}
   {# -------------------------------------------------------------------- #}
   {% if document.personas %}
-  <h2 class="section-heading">Personas</h2>
+  <details open>
+  <summary>Personas</summary>
   <div class="personas">
     {% for persona in document.personas %}
     <div class="persona-card">
@@ -251,6 +289,7 @@
     </div>
     {% endfor %}
   </div>
+  </details>
   {% endif %}
 
   {# -------------------------------------------------------------------- #}
