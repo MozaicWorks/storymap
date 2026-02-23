@@ -2,68 +2,40 @@
 
 Generate user story maps from markdown. Write your product spec as a readable
 document — personas, releases, activities, tasks, and stories — and render it
-as a styled HTML page or PDF.
+as a styled HTML page.
 
 ## Installation
 
-Requires [pipenv](https://pipenv.pypa.io) and [just](https://github.com/casey/just).
-
 ```bash
-git clone https://github.com/yourorg/storymap
-cd storymap
-just install
+pip install storymap
 ```
 
 ## Quick start
 
 ```bash
-storymap init                   # → storymap.md in current directory
-storymap init myproduct.md      # → myproduct.md
-just run mymap.md               # → out/mymap.html
-just run-out mymap.md ./output  # → output/mymap.html
-```
-
-Or directly via pipenv:
-
-```bash
-pipenv run storymap render mymap.md --output ./out
+storymap init                   # create a skeleton storymap.md
+storymap init myproduct.md      # create a named skeleton
+storymap render mymap.md        # → mymap.html (same directory)
+storymap render mymap.md -o out # → out/mymap.html
 ```
 
 **PDF output:** open the generated HTML in a browser and use print-to-PDF
-(Ctrl+P → Save as PDF). Browser print produces better results than any
-automated converter for wide table layouts.
-
-## Just commands
-
-| Command | Description |
-|---|---|
-| `just install` | Install dependencies and package in editable mode |
-| `just init` | Create a skeleton storymap.md in current directory |
-| `just init-named FILE` | Create a skeleton with a specific filename |
-| `just run FILE` | Render HTML output from a markdown file (→ out/) |
-| `just run-out FILE DIR` | Render HTML output to a specific directory |
-| `just test` | Run all tests |
-| `just test-v` | Run all tests with verbose output |
-| `just test-module MODULE` | Run tests for one module (e.g. `just test-module parser`) |
-| `just template-path` | Print the path to the bundled default template |
-| `just clean` | Remove the out/ folder |
-| `just clean-build` | Remove build artifacts including egg-info |
-| `just clean-env` | Remove the virtualenv and lock file |
-| `just build` | Build distribution packages (sdist + wheel) |
-| `just publish` | Upload to PyPI |
-| `just publish-test` | Upload to TestPyPI for a dry run |
-| `just release` | Tag, push, and create a GitHub release |
+(Ctrl+P → Save as PDF). The HTML includes print-optimised CSS for landscape
+layout and color preservation.
 
 ## Document format
 
-A storymap file is a standard markdown document with four reserved top-level
-sections: `Releases`, `Personas`, `Map`, and optionally any other headings
-you want (they are ignored by the renderer but appear in the HTML output).
+A storymap file is a standard markdown document with three reserved top-level
+sections: `# Releases`, `# Personas`, and `# Map`. Any other `#` heading is
+treated as the document title (first one) or passed through to the output.
 
 ```markdown
+# My Product
+Short description.
+
 # Releases
 ## MVP
-First public release targeting core authentication.
+First public release.
 
 ## Beta
 Invite-only beta with selected users.
@@ -71,26 +43,15 @@ Invite-only beta with selected users.
 # Personas
 ## Margie the Manager
 - **Age:** 45–55
-- **Location:** Suburban midwest
-- **Job title:** Operations Manager
-- **Tech level:** Low — uses email and Excel, avoids new tools
+- **Tech level:** Low
 
-Margie manages a team of 8 and primarily accesses the app on her phone.
-
-![Margie](margie.jpg){width=200px}
-
-[Research interview notes](https://docs.google.com/...)
-
-## Dave the Developer
-- **Age:** 28–35
-- **Tech level:** High — API-first mindset
+Margie manages a team of 8 and primarily uses the app on mobile.
 
 # Map
 ## User Management
 ### Authentication
 #### Sign in [status:: done] [persona:: Margie the Manager]
 User can log in with email and password.
-See [issue #1](https://github.com/org/repo/issues/1)
 
 > release Beta
 
@@ -103,14 +64,6 @@ See [issue #1](https://github.com/org/repo/issues/1)
 
 #### Upload avatar [status:: blocked]
 Blocked pending storage provider decision.
-
-## Reporting
-### Dashboard
-#### View summary [status:: not-started] [persona:: Margie the Manager]
-
-> release Beta
-
-#### Export to CSV [deadline:: 2026-06-01]
 ```
 
 ### Sections
@@ -121,9 +74,7 @@ Blocked pending storage provider decision.
 | `# Personas` | No | UX persona descriptions |
 | `# Map` | Yes | The story map itself |
 
-Section names are case-insensitive. Any other `#` headings are passed through
-to the rendered output unchanged, allowing you to add an introduction,
-project goals, or other context that makes the PDF self-contained.
+Section names are case-insensitive.
 
 ### Map hierarchy
 
@@ -133,11 +84,8 @@ project goals, or other context that makes the PDF self-contained.
 #### Story        (card in a swimlane)
 ```
 
-Stories are grouped into release swimlanes by `> release` separators within each
-task. Stories before the first `> release` belong to the first release, after the
-first `> release` to the second release, and so on.
-
-You can annotate the separator for readability — anything after `release` is ignored:
+Use `> release` on its own line to advance to the next release swimlane within
+a task. Annotate it for readability — anything after `release` is ignored:
 
 ```markdown
 ### Authentication
@@ -149,11 +97,13 @@ You can annotate the separator for readability — anything after `release` is i
                       ← Release 3 empty for this task
 ```
 
+Keep `> release` count consistent across all tasks — mismatched counts produce
+misaligned swimlane rows.
+
 ### Story fields
 
-Stories support optional inline fields using the
-[Dataview](https://blacksmithgu.github.io/obsidian-dataview/) `[key:: value]`
-syntax. Fields appear as badges on the rendered story card.
+Stories support optional inline fields using `[key:: value]` syntax.
+Fields appear as badges on the rendered story card.
 
 ```markdown
 #### Story name [status:: done] [persona:: Margie the Manager] [deadline:: 2026-03-01]
@@ -165,20 +115,13 @@ syntax. Fields appear as badges on the rendered story card.
 | `persona` | Any string matching a persona name | — |
 | `deadline` | ISO date `YYYY-MM-DD` | — |
 
-Any other `[key:: value]` field is accepted and rendered as a badge, making
-the format forward-compatible with future additions.
+Any other `[key:: value]` field is accepted and rendered as a badge.
 
 ### Story descriptions
 
-Markdown content following a `#### Story` heading and before the next
-heading or `> release` separator is treated as the story description. Descriptions
+Markdown content following a `#### Story` heading and before the next heading
+or `> release` separator is treated as the story description. Descriptions
 support standard markdown: bold, italics, links, lists.
-
-```markdown
-#### Sign in [status:: done]
-User can log in with email and password.
-See [issue #1](https://github.com/org/repo/issues/1)
-```
 
 ## CLI reference
 
@@ -225,10 +168,8 @@ Usage: storymap init [OUTPUT_FILE]
 
 ### Color overrides
 
-Override any status or UI color from the command line:
-
 ```bash
-storymap mymap.md \
+storymap render mymap.md \
   --status-colors "done=#27AE60,in-progress=#2980B9,blocked=#E74C3C" \
   --ui-colors "activity=#2C3E50,task=#34495E"
 ```
@@ -244,21 +185,11 @@ Default status colors:
 
 ### Custom templates
 
-Copy the bundled template and modify it:
-
 ```bash
-# find the bundled template
-just template-path
-# → /path/to/storymap/templates/default.html.j2
+storymap render mymap.md --template my-template.html.j2
 ```
 
-Then render with your custom template:
-
-```bash
-storymap mymap.md --template my-template.html.j2
-```
-
-The template receives the following context variables:
+The template receives:
 
 | Variable | Type | Description |
 |---|---|---|
@@ -269,14 +200,12 @@ The template receives the following context variables:
 
 The `darken` filter is also available: `{{ color | darken }}`.
 
-## Known limitations
-
-There are no known format limitations at this time.
-
 ## Development
 
+Requires [pipenv](https://pipenv.pypa.io) and [just](https://github.com/casey/just).
+
 ```bash
-git clone https://github.com/yourorg/storymap
+git clone https://github.com/mozaicworks/storymap
 cd storymap
 just install
 just test
