@@ -76,7 +76,7 @@ publish-test: build
     {{pipenv}} run twine upload --repository testpypi dist/*
 
 # Create a git tag and GitHub release for the current version
-release: build
+release: publish
     #!/usr/bin/env bash
     set -euo pipefail
     version=$({{pipenv}} run python -c "from importlib.metadata import version; print(version('storymap'))")
