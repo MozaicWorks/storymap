@@ -36,6 +36,7 @@ _SECTION_MAP = "map"
 
 class _Section(Enum):
     START = auto()
+    TITLE = auto()
     RELEASES = auto()
     PERSONAS = auto()
     MAP = auto()
@@ -109,9 +110,15 @@ class StorymapParser:
                 doc.personas.append(current_persona)
                 current_persona = None
 
+        def finalize_title(end_line: int) -> None:
+            if section == _Section.TITLE:
+                doc.description = extract_desc(end_line)
+
         def finalize_section(end_line: int) -> None:
             """Flush the current section before transitioning to a new one."""
-            if section == _Section.RELEASES:
+            if section == _Section.TITLE:
+                finalize_title(end_line)
+            elif section == _Section.RELEASES:
                 finalize_release(end_line)
             elif section == _Section.PERSONAS:
                 finalize_persona(end_line)
@@ -139,6 +146,10 @@ class StorymapParser:
                         section = _Section.PERSONAS
                     elif keyword == _SECTION_MAP:
                         section = _Section.MAP
+                    elif section == _Section.START and doc.title is None:
+                        doc.title = content.strip()
+                        section = _Section.TITLE
+                        desc_start = token_end
 
                 elif level == 2:
                     if section == _Section.RELEASES:

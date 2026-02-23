@@ -213,6 +213,22 @@ class TestStorymapDocument:
         assert doc.personas == []
         assert doc.activities == []
 
+    def test_title_defaults_to_none(self):
+        doc = StorymapDocument()
+        assert doc.title is None
+
+    def test_description_defaults_to_empty(self):
+        doc = StorymapDocument()
+        assert doc.description == ""
+
+    def test_title_can_be_set(self):
+        doc = StorymapDocument(title="My Product")
+        assert doc.title == "My Product"
+
+    def test_description_can_be_set(self):
+        doc = StorymapDocument(description="Short description.")
+        assert doc.description == "Short description."
+
     def test_can_hold_releases(self):
         doc = StorymapDocument(releases=[Release(name="MVP"), Release(name="Beta")])
         assert len(doc.releases) == 2
@@ -236,11 +252,15 @@ class TestStorymapDocument:
         task = Task(name="Authentication", story_groups=[[story], []])
         activity = Activity(name="User Management", tasks=[task])
         doc = StorymapDocument(
+            title="My Product",
+            description="**Version:** 1.0",
             releases=[Release(name="MVP"), Release(name="Beta")],
             personas=[Persona(name="Margie the Manager", description="A manager.")],
             activities=[activity],
         )
 
+        assert doc.title == "My Product"
+        assert "Version" in doc.description
         assert len(doc.releases) == 2
         assert len(doc.personas) == 1
         assert len(doc.activities) == 1

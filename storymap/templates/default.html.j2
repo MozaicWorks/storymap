@@ -25,6 +25,25 @@
     a { color: #1565C0; }
 
     /* ------------------------------------------------------------------ */
+    /* Document header                                                       */
+    /* ------------------------------------------------------------------ */
+    .doc-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 3px solid #1565C0;
+    }
+
+    .doc-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #1565C0;
+      margin-bottom: 0.5rem;
+    }
+
+    .doc-description p  { line-height: 1.6; color: #424242; margin-bottom: 0.4rem; }
+    .doc-description ul { padding-left: 1.2rem; }
+
+    /* ------------------------------------------------------------------ */
     /* Section headings                                                      */
     /* ------------------------------------------------------------------ */
     .section-heading {
@@ -253,6 +272,18 @@
   </style>
 </head>
 <body>
+
+  {# -------------------------------------------------------------------- #}
+  {# Title                                                                  #}
+  {# -------------------------------------------------------------------- #}
+  {% if document.title %}
+  <header class="doc-header">
+    <h1 class="doc-title">{{ document.title }}</h1>
+    {% if document.description %}
+    <div class="doc-description">{{ render_md(document.description) }}</div>
+    {% endif %}
+  </header>
+  {% endif %}
 
   {# -------------------------------------------------------------------- #}
   {# Releases                                                               #}

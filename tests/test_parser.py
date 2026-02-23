@@ -448,13 +448,16 @@ class TestParserEdgeCases:
         assert len(doc.personas) == 1
         assert len(doc.activities) == 1
 
-    def test_unknown_h1_section_is_ignored(self):
+    def test_unknown_h1_after_title_is_ignored(self):
+        """An unknown h1 that appears after the title should be ignored."""
         src = (
+            "# My Product\n\n"
             "# Introduction\nSome intro text.\n\n"
             "# Releases\n## MVP\n\n"
             "# Map\n## A\n### T\n#### S\n"
         )
         doc = StorymapParser().parse(src)
+        assert doc.title == "My Product"
         assert len(doc.releases) == 1
 
     def test_description_multiline(self):
@@ -469,3 +472,116 @@ class TestParserEdgeCases:
         story = doc.activities[0].tasks[0].story_groups[0][0]
         assert "First paragraph." in story.description
         assert "Second paragraph." in story.description
+
+
+# ---------------------------------------------------------------------------
+# StorymapParser — document title and description
+# ---------------------------------------------------------------------------
+
+
+class TestParserTitle:
+    def test_no_title(self):
+        doc = StorymapParser().parse(MINIMAL)
+        assert doc.title is None
+
+    def test_no_title_description_is_empty(self):
+        doc = StorymapParser().parse(MINIMAL)
+        assert doc.description == ""
+
+    def test_title_only(self):
+        src = (
+            "# My Product\n\n"
+            "# Releases\n## MVP\n\n"
+            "# Map\n## A\n### T\n#### S\n"
+        )
+        doc = StorymapParser().parse(src)
+        assert doc.title == "My Product"
+
+    def test_title_with_description(self):
+        src = (
+            "# My Product\n\n"
+            "Short description of the product.\n\n"
+            "# Releases\n## MVP\n\n"
+            "# Map\n## A\n### T\n#### S\n"
+        )
+        doc = StorymapParser().parse(src)
+        assert doc.title == "My Product"
+        assert "Short description" in doc.description
+
+    def test_title_description_multiline(self):
+        src = (
+            "# My Product\n\n"
+            "First paragraph.\n\n"
+            "Second paragraph.\n\n"
+            "# Releases\n## MVP\n\n"
+            "# Map\n## A\n### T\n#### S\n"
+        )
+        doc = StorymapParser().parse(src)
+        assert "First paragraph." in doc.description
+        assert "Second paragraph." in doc.description
+
+    def test_title_description_with_markdown(self):
+        src = (
+            "# My Product\n\n"
+            "**Version:** 1.0 — see [brief](https://docs.example.com)\n\n"
+            "# Releases\n## MVP\n\n"
+            "# Map\n## A\n### T\n#### S\n"
+        )
+        doc = StorymapParser().parse(src)
+        assert "**Version:**" in doc.description
+        assert "[brief]" in doc.description
+
+    def test_title_without_description_is_empty_string(self):
+        src = (
+            "# My Product\n"
+            "# Releases\n## MVP\n\n"
+            "# Map\n## A\n### T\n#### S\n"
+        )
+        doc = StorymapParser().parse(src)
+        assert doc.title == "My Product"
+        assert doc.description == ""
+
+    def test_title_does_not_affect_releases(self):
+        src = (
+            "# My Product\n\n"
+            "Some description.\n\n"
+            "# Releases\n## MVP\n## Beta\n\n"
+            "# Map\n## A\n### T\n#### S\n"
+        )
+        doc = StorymapParser().parse(src)
+        assert len(doc.releases) == 2
+
+    def test_title_does_not_affect_personas(self):
+        src = (
+            "# My Product\n\n"
+            "# Releases\n## MVP\n\n"
+            "# Personas\n## Dave\n\n"
+            "# Map\n## A\n### T\n#### S\n"
+        )
+        doc = StorymapParser().parse(src)
+        assert len(doc.personas) == 1
+        assert doc.personas[0].name == "Dave"
+
+    def test_title_does_not_affect_map(self):
+        src = (
+            "# My Product\n\n"
+            "# Releases\n## MVP\n\n"
+            "# Map\n## Activity\n### Task\n#### Story\n"
+        )
+        doc = StorymapParser().parse(src)
+        assert len(doc.activities) == 1
+        assert doc.activities[0].tasks[0].story_groups[0][0].name == "Story"
+
+    def test_reserved_h1_first_is_not_treated_as_title(self):
+        """If the first h1 is a reserved keyword, no title is set."""
+        doc = StorymapParser().parse(MINIMAL)
+        assert doc.title is None
+
+    def test_title_whitespace_stripped(self):
+        src = (
+            "#   My Product   \n\n"
+            "# Releases\n## MVP\n\n"
+            "# Map\n## A\n### T\n#### S\n"
+        )
+        doc = StorymapParser().parse(src)
+        assert doc.title == "My Product"

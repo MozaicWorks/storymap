@@ -106,6 +106,8 @@ class Persona:
 class StorymapDocument:
     """Root document containing all sections."""
 
+    title: str | None = None
+    description: str = ""
     releases: list[Release] = field(default_factory=list)
     personas: list[Persona] = field(default_factory=list)
     activities: list[Activity] = field(default_factory=list)
