@@ -11,7 +11,7 @@ override the defaults without touching the template.
 
 from pathlib import Path
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import Environment, FileSystemLoader
 from markupsafe import Markup
 from markdown_it import MarkdownIt
 
@@ -50,7 +50,7 @@ def _darken(hex_color: str, amount: int = 40) -> str:
 def _make_jinja_env(template_dir: Path) -> Environment:
     env = Environment(
         loader=FileSystemLoader(str(template_dir)),
-        autoescape=select_autoescape(["html"]),
+        autoescape=True,
         trim_blocks=True,
         lstrip_blocks=True,
     )
@@ -114,14 +114,7 @@ def _build_context(
     status_colors: dict[str, str],
     ui_colors: dict[str, str],
 ) -> dict:
-    """
-    Build the Jinja2 template context.
-
-    Because Jinja2 loop variables are scoped to their own loop, we cannot
-    use the outer release loop index inside the nested task/story loops.
-    Instead we render each release row independently and pass the results
-    as a pre-built list, keeping logic out of the template.
-    """
+    """Build the Jinja2 template context."""
     return {
         "document": document,
         "status_colors": status_colors,
