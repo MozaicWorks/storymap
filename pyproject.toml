@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "storymap"
-version = "0.1.1"
+version = "0.1.2"
 description = "Generate user story maps from markdown"
 readme = "README.md"
 license = "MIT"
@@ -40,6 +40,9 @@ storymap = "storymap.cli:main"
 
 [tool.setuptools.packages.find]
 exclude = ["out*", "tests*"]
+
+[tool.setuptools.package-data]
+storymap = ["templates/*.j2"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
