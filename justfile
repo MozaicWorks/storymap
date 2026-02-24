@@ -1,11 +1,13 @@
 # storymap justfile
 # requires: just (https://github.com/casey/just)
 #           pipenv (https://pipenv.pypa.io)
-# for release: gh (GitHub CLI)
+# for release: gh (GitHub CLI), docker
 
 pipenv := require("pipenv")
 gh     := require("gh")
+docker := require("docker")
 out_dir := "out"
+image  := "ghcr.io/mozaicworks/storymap"
 
 # List available recipes
 default:
@@ -76,7 +78,7 @@ publish-test: build
     {{pipenv}} run twine upload --repository testpypi dist/*
 
 # Create a git tag and GitHub release for the current version
-release: publish
+release: publish docker-push
     #!/usr/bin/env bash
     set -euo pipefail
     version=$({{pipenv}} run python -c "from importlib.metadata import version; print(version('storymap'))")
@@ -87,6 +89,25 @@ release: publish
     {{ gh }} release create "${tag}" dist/* \
         --title "storymap ${tag}" \
         --generate-notes
+
+# Build the Docker image
+docker-build:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    version=$({{pipenv}} run python -c "from importlib.metadata import version; print(version('storymap'))")
+    {{docker}} build -t {{image}}:${version} -t {{image}}:latest .
+
+# Push the Docker image to ghcr.io (run docker-login first if needed)
+docker-push: docker-build
+    #!/usr/bin/env bash
+    set -euo pipefail
+    version=$({{pipenv}} run python -c "from importlib.metadata import version; print(version('storymap'))")
+    {{docker}} push {{image}}:${version}
+    {{docker}} push {{image}}:latest
+
+# Authenticate with ghcr.io (requires GITHUB_TOKEN env var and GITHUB_USER env var)
+docker-login:
+    echo $GITHUB_TOKEN | {{docker}} login ghcr.io -u $GITHUB_USER --password-stdin
 
 # Show the path to the bundled default template
 template-path:
