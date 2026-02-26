@@ -247,15 +247,15 @@
     .story-card details > summary {
       list-style: none;
       cursor: pointer;
-      font-weight: 600;
-      font-size: 0.82rem;
-      margin: 0;
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: rgba(0,0,0,0.45);
+      margin-top: 0.25rem;
       padding: 0;
       border: none;
-      color: inherit;
-      display: flex;
-      align-items: flex-start;
-      gap: 0.3rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
     }
 
     .story-card details > summary::-webkit-details-marker { display: none; }
@@ -275,6 +275,12 @@
     }
 
     .story-card details > .story-description {
+      margin-top: 0.3rem;
+      padding-top: 0.3rem;
+      border-top: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .story-details {
       margin-top: 0.3rem;
       padding-top: 0.3rem;
       border-top: 1px solid rgba(0,0,0,0.1);
@@ -436,10 +442,15 @@
             {% set story_color = story.status_color(status_colors) %}
             <div class="story-card" style="background: {{ story_color }}; border-left-color: {{ story_color | darken }};">
               {% if story.description %}
-              <details>
-                <summary>{{ story.name }}</summary>
-                <div class="story-description">{{ render_md(story.description) }}</div>
-              </details>
+                {% set rest = render_md_rest(story.description) %}
+                <div class="story-name">{{ story.name }}</div>
+                <div class="story-description">{{ render_md_intro(story.description) }}</div>
+                {% if rest %}
+                <details>
+                  <summary>more</summary>
+                  <div class="story-details">{{ rest }}</div>
+                </details>
+                {% endif %}
               {% else %}
               <div class="story-name">{{ story.name }}</div>
               {% endif %}

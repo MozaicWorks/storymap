@@ -25,15 +25,27 @@ _DEFAULT_TEMPLATE_DIR = Path(__file__).parent / "templates"
 _DEFAULT_TEMPLATE_NAME = "default.html.j2"
 
 
-def _make_render_md() -> callable:
-    """Return a function that renders a markdown string to an HTML fragment."""
+def _make_render_md() -> tuple:
+    """Return (render_md, render_md_intro, render_md_rest) functions."""
     md = MarkdownIt()
     md.disable("lheading")
 
     def render_md(text: str) -> Markup:
         return Markup(md.render(text))
 
-    return render_md
+    def render_md_intro(text: str) -> Markup:
+        """Render only the first paragraph of text."""
+        intro = text.split("\n\n")[0].strip()
+        return Markup(md.render(intro))
+
+    def render_md_rest(text: str) -> Markup:
+        """Render everything after the first paragraph, or empty string."""
+        parts = text.split("\n\n", 1)
+        if len(parts) < 2:
+            return Markup("")
+        return Markup(md.render(parts[1].strip()))
+
+    return render_md, render_md_intro, render_md_rest
 
 
 def _darken(hex_color: str, amount: int = 40) -> str:
@@ -115,9 +127,12 @@ def _build_context(
     ui_colors: dict[str, str],
 ) -> dict:
     """Build the Jinja2 template context."""
+    render_md, render_md_intro, render_md_rest = _make_render_md()
     return {
         "document": document,
         "status_colors": status_colors,
         "ui_colors": ui_colors,
-        "render_md": _make_render_md(),
+        "render_md": render_md,
+        "render_md_intro": render_md_intro,
+        "render_md_rest": render_md_rest,
     }
