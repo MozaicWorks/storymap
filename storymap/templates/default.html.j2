@@ -25,13 +25,8 @@
     a { color: #1565C0; }
 
     /* ------------------------------------------------------------------ */
-    /* Document header                                                       */
+    /* Document header — see zoom controls section above                    */
     /* ------------------------------------------------------------------ */
-    .doc-header {
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 3px solid #1565C0;
-    }
 
     .doc-title {
       font-size: 2rem;
@@ -238,49 +233,110 @@
     }
 
     /* ------------------------------------------------------------------ */
-    /* Story details                                                         */
+    /* Zoom controls                                                         */
     /* ------------------------------------------------------------------ */
-    .story-card details {
-      margin: 0;
-    }
-
-    .story-card details > summary {
-      list-style: none;
-      cursor: pointer;
-      font-size: 0.72rem;
-      font-weight: 500;
-      color: rgba(0,0,0,0.45);
-      margin-top: 0.25rem;
-      padding: 0;
-      border: none;
-      display: inline-flex;
+    .zoom-controls {
+      display: flex;
       align-items: center;
       gap: 0.25rem;
+      margin-left: auto;
     }
 
-    .story-card details > summary::-webkit-details-marker { display: none; }
-
-    .story-card details > summary::before {
-      content: "▶";
-      font-size: 0.6rem;
-      color: rgba(0,0,0,0.35);
-      transition: transform 0.15s ease;
-      display: inline-block;
-      flex-shrink: 0;
-      margin-top: 0.2rem;
+    .zoom-btn {
+      border: 1px solid #BDBDBD;
+      background: #FFFFFF;
+      color: #616161;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.6rem;
+      border-radius: 3px;
+      cursor: pointer;
+      line-height: 1.4;
     }
 
-    .story-card details[open] > summary::before {
-      transform: rotate(90deg);
+    .zoom-btn.active {
+      background: #1565C0;
+      border-color: #1565C0;
+      color: #FFFFFF;
     }
 
-    .story-card details > .story-description {
+    .zoom-btn:hover:not(.active) {
+      background: #E3F2FD;
+      border-color: #90CAF9;
+    }
+
+    .doc-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 3px solid #1565C0;
+      position: sticky;
+      top: 0;
+      background: #FAFAFA;
+      z-index: 100;
+    }
+
+    .doc-header-content { flex: 1; }
+
+    /* ------------------------------------------------------------------ */
+    /* Release focus                                                         */
+    /* ------------------------------------------------------------------ */
+    .focus-select {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid #BDBDBD;
+      border-radius: 3px;
+      background: #FFFFFF;
+      color: #616161;
+      cursor: pointer;
+    }
+
+    {% for release in document.releases %}
+    body.focus-{{ loop.index0 }} tr.release-row:not([data-release="{{ loop.index0 }}"]) {
+      opacity: 0.25;
+    }
+    body.focus-{{ loop.index0 }} tr.release-row[data-release="{{ loop.index0 }}"] .release-label {
+      font-weight: 800;
+      outline: 2px solid {{ ui_colors.release_header | darken }};
+      outline-offset: -2px;
+    }
+    {% endfor %}
+
+
+    /* ------------------------------------------------------------------ */
+    /* Zoom level 1 — overview: backbone only                               */
+    /* ------------------------------------------------------------------ */
+    body.zoom-1 .story-cell { padding: 0.15rem; }
+    body.zoom-1 .story-card { padding: 0.25rem 0.4rem; }
+    body.zoom-1 .story-name { font-size: 0.75rem; }
+    body.zoom-1 .story-description,
+    body.zoom-1 .story-meta { display: none; }
+
+    /* ------------------------------------------------------------------ */
+    /* Zoom level 2 — map: names, badges and short description only         */
+    /* ------------------------------------------------------------------ */
+    body.zoom-2 .story-rest { display: none; }
+
+    /* ------------------------------------------------------------------ */
+    /* Zoom level 3 — detail: full descriptions visible                     */
+    /* ------------------------------------------------------------------ */
+    body.zoom-3 .story-description { display: block; }
+
+
+    /* ------------------------------------------------------------------ */
+    /* Story description                                                     */
+    /* ------------------------------------------------------------------ */
+    .story-description {
       margin-top: 0.3rem;
       padding-top: 0.3rem;
       border-top: 1px solid rgba(0,0,0,0.1);
+      font-size: 0.78rem;
+      line-height: 1.5;
     }
 
-    .story-details {
+    .story-rest {
       margin-top: 0.3rem;
       padding-top: 0.3rem;
       border-top: 1px solid rgba(0,0,0,0.1);
@@ -346,23 +402,37 @@
       /* details open, chevron hidden */
       details { display: block; }
       details > summary::before { display: none; }
-      .story-card details > summary::before { display: none; }
+      /* show full descriptions when printing */
+      .story-description { display: block !important; }
     }
   </style>
 </head>
-<body>
+<body class="zoom-2">
 
   {# -------------------------------------------------------------------- #}
-  {# Title                                                                  #}
+  {# Title + zoom controls                                                  #}
   {# -------------------------------------------------------------------- #}
-  {% if document.title %}
   <header class="doc-header">
-    <h1 class="doc-title">{{ document.title }}</h1>
-    {% if document.description %}
-    <div class="doc-description">{{ render_md(document.description) }}</div>
+    <div class="doc-header-content">
+    {% if document.title %}
+      <h1 class="doc-title">{{ document.title }}</h1>
+      {% if document.description %}
+      <div class="doc-description">{{ render_md(document.description) }}</div>
+      {% endif %}
     {% endif %}
+    </div>
+    <div class="zoom-controls">
+      <button class="zoom-btn" data-zoom="1" title="Overview">⊟ Overview</button>
+      <button class="zoom-btn active" data-zoom="2" title="Map">⊞ Map</button>
+      <button class="zoom-btn" data-zoom="3" title="Detail">⊕ Detail</button>
+      <select class="focus-select" id="release-focus" title="Focus on release">
+        <option value="all">All releases</option>
+        {% for release in document.releases %}
+        <option value="{{ loop.index0 }}">{{ release.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
   </header>
-  {% endif %}
 
   {# -------------------------------------------------------------------- #}
   {# Releases                                                               #}
@@ -433,7 +503,7 @@
       {# Release swimlane rows #}
       {% for release in document.releases %}
       {% set release_idx = loop.index0 %}
-      <tr>
+      <tr class="release-row {% if loop.first %}current-release{% endif %}" data-release="{{ release_idx }}">
         <td class="release-label">{{ release.name }}</td>
         {% for activity in document.activities %}
           {% for task in activity.tasks %}
@@ -441,18 +511,15 @@
             {% for story in task.stories_for_release(release_idx) %}
             {% set story_color = story.status_color(status_colors) %}
             <div class="story-card" style="background: {{ story_color }}; border-left-color: {{ story_color | darken }};">
-              {% if story.description %}
-                {% set rest = render_md_rest(story.description) %}
-                <div class="story-name">{{ story.name }}</div>
-                <div class="story-description">{{ render_md_intro(story.description) }}</div>
-                {% if rest %}
-                <details>
-                  <summary>more</summary>
-                  <div class="story-details">{{ rest }}</div>
-                </details>
-                {% endif %}
-              {% else %}
               <div class="story-name">{{ story.name }}</div>
+              {% if story.description %}
+              <div class="story-description">
+                <div class="story-intro">{{ render_md_intro(story.description) }}</div>
+                {% set rest = render_md_rest(story.description) %}
+                {% if rest %}
+                <div class="story-rest">{{ rest }}</div>
+                {% endif %}
+              </div>
               {% endif %}
               {% set meta_fields = story.fields | reject_key("status") %}
               {% if story.fields or meta_fields %}
@@ -485,5 +552,23 @@
   </div>
   {% endif %}
 
+  <script>
+    function setZoom(level) {
+      document.body.className = document.body.className.replace(/zoom-\d/, 'zoom-' + level);
+      document.querySelectorAll('.zoom-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('.zoom-btn[data-zoom="' + level + '"]').classList.add('active');
+    }
+
+    document.querySelectorAll('.zoom-btn').forEach(btn => {
+      btn.addEventListener('click', () => setZoom(btn.dataset.zoom));
+    });
+
+    document.getElementById('release-focus').addEventListener('change', function() {
+      document.body.className = document.body.className.replace(/\s*focus-\d+/, '');
+      if (this.value !== 'all') {
+        document.body.classList.add('focus-' + this.value);
+      }
+    });
+  </script>
 </body>
 </html>
