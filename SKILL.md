@@ -33,12 +33,10 @@ Description with markdown.
 # Map             ← required
 ## Activity       ← column group
 ### Task          ← column
-#### Story [status:: done] [persona:: Name] [deadline:: YYYY-MM-DD]
+#### Story [status:: done] [persona:: Name] [release:: Release 1] [deadline:: YYYY-MM-DD]
 Optional story description.
 
-> release Release 2
-
-#### Story in second swimlane [status:: not-started]
+#### Story in second swimlane [status:: not-started] [release:: Release 2]
 ```
 
 ## Rules
@@ -46,10 +44,9 @@ Optional story description.
 - `# Releases`, `# Personas`, `# Map` are reserved section names (case-insensitive)
 - Any other `#` heading becomes the document title (first one) or is passed through
 - Map hierarchy is strictly `##` Activity → `###` Task → `####` Story
-- `> release` on its own line advances to the next swimlane within a task
-- Annotate for readability: `> release Beta` (text after "release" is ignored)
-- Keep `> release` count **consistent across all tasks** — mismatched counts produce misaligned swimlane rows
-- Number of `> release` markers per task should equal number of releases minus one
+- Each story is assigned to a release swimlane via `[release:: Release Name]`
+- The `[release::]` value must exactly match a release name defined in `# Releases`
+- Stories without a `[release::]` field are parsed but not shown in any swimlane
 - Story names are short labels (a few words); put detail in the description body
 - Always add `[status:: ...]` to every story — it drives the card color in the HTML
 - Status values: `not-started`, `in-progress`, `done`, `blocked`
@@ -86,25 +83,17 @@ Uses the app daily for personal and work tasks.
 # Map
 ## Task Management
 ### Create Tasks
-#### Add a task [status:: done] [persona:: Sam the Solo User]
+#### Add a task [status:: done] [persona:: Sam the Solo User] [release:: MVP]
 Title and optional due date.
 
-> release Beta
-
-#### Add subtasks [status:: not-started]
+#### Add subtasks [status:: not-started] [release:: Beta]
 
 ### Complete Tasks
-#### Mark task as done [status:: done]
-
-> release Beta
-
-#### Bulk complete [status:: not-started]
+#### Mark task as done [status:: done] [release:: MVP]
+#### Bulk complete [status:: not-started] [release:: Beta]
 
 ## Sharing
 ### Collaboration
-#### Share task list [status:: not-started]
-
-> release Beta
-
-#### Assign tasks [status:: not-started]
+#### Share task list [status:: not-started] [release:: MVP]
+#### Assign tasks [status:: not-started] [release:: Beta]
 ```

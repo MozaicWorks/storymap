@@ -60,26 +60,22 @@ The story map itself. Three levels of hierarchy:
 #### Story      — card in a release swimlane
 ```
 
-Use `> release` on its own line to advance to the next release swimlane within
-a task. You can annotate it for readability — anything after "release" is ignored:
+Each story is assigned to a release swimlane using the `[release:: name]` field.
+The name must exactly match a release defined in `# Releases`.
+Stories without a `[release::]` field are parsed but not shown in any swimlane.
 
 ```markdown
 ## User Management
 ### Authentication
-#### Sign in [status:: done] [persona:: Alice the User]
+#### Sign in [status:: done] [persona:: Alice the User] [release:: MVP]
 User can log in with email and password.
 
-> release Beta
-
-#### SSO login [status:: in-progress]
+#### SSO login [status:: in-progress] [release:: Beta]
 Support Google and Microsoft OAuth.
 
 ### Profile
-#### Edit profile [status:: done]
-
-> release Beta
-
-#### Upload avatar [status:: not-started]
+#### Edit profile [status:: done] [release:: MVP]
+#### Upload avatar [status:: not-started] [release:: Beta]
 ```
 
 ### Story fields
@@ -90,6 +86,7 @@ Fields appear as badges on the rendered card.
 | Field | Values |
 |---|---|
 | `status` | `not-started`, `in-progress`, `done`, `blocked` |
+| `release` | Release name from `# Releases` section |
 | `persona` | Any string matching a persona name |
 | `deadline` | ISO date `YYYY-MM-DD` |
 
@@ -99,15 +96,9 @@ Any other `[key:: value]` field is accepted and rendered as a badge.
 
 - Every task must have at least one story
 - Every activity must have at least one task
-- Use `> release` consistently across tasks — if one task has two `> release`
-  separators, all tasks in the same activity should too, or the table will have
-  misaligned swimlanes
-- Release count in the map should match the number of releases defined in
-  `# Releases`
+- Every story must have a `[release:: name]` field matching a defined release
 - Story names should be short (a few words) — put detail in the description
 - Use the `status` field on every story so the map is readable at a glance
-- Annotate `> release` markers with the release name for readability:
-  `> release Beta`
 
 ## Example
 
@@ -130,27 +121,19 @@ Uses the app daily to manage personal and work tasks.
 # Map
 ## Task Management
 ### Create Tasks
-#### Add a task [status:: done] [persona:: Sam the Solo User]
+#### Add a task [status:: done] [persona:: Sam the Solo User] [release:: MVP]
 User can create a task with a title and optional due date.
 
-> release Beta
-
-#### Add subtasks [status:: not-started]
+#### Add subtasks [status:: not-started] [release:: Beta]
 Break tasks into smaller steps.
 
 ### Complete Tasks
-#### Mark task as done [status:: done]
-
-> release Beta
-
-#### Bulk complete [status:: not-started]
+#### Mark task as done [status:: done] [release:: MVP]
+#### Bulk complete [status:: not-started] [release:: Beta]
 Select multiple tasks and mark them all done.
 
 ## Sharing
 ### Collaboration
-#### Share task list [status:: not-started] [deadline:: 2026-09-01]
-
-> release Beta
-
-#### Assign tasks to others [status:: not-started]
+#### Share task list [status:: not-started] [deadline:: 2026-09-01] [release:: MVP]
+#### Assign tasks to others [status:: not-started] [release:: Beta]
 ```
