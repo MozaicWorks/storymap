@@ -77,11 +77,8 @@
       color: #1565C0;
     }
 
-    .persona-card img {
-      max-width: 100%;
-      border-radius: 4px;
-      margin-bottom: 0.5rem;
-    }
+    .story-card img { max-width: 100%; border-radius: 3px; margin-top: 0.25rem; }
+    .persona-card img { max-width: 100%; border-radius: 4px; margin-bottom: 0.5rem; }
 
     .persona-card ul { padding-left: 1.2rem; }
     .persona-card li { margin-bottom: 0.2rem; }
@@ -343,7 +340,54 @@
     }
 
     /* ------------------------------------------------------------------ */
-    /* Expanded story card                                                   */
+    /* Focus mode toggle                                                     */
+    /* ------------------------------------------------------------------ */
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      color: #616161;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-label input { display: none; }
+
+    .toggle-track {
+      width: 32px;
+      height: 18px;
+      background: #BDBDBD;
+      border-radius: 9px;
+      position: relative;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #FFFFFF;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: left 0.2s;
+    }
+
+    .toggle-label input:checked + .toggle-track {
+      background: #1565C0;
+    }
+
+    .toggle-label input:checked + .toggle-track::after {
+      left: 17px;
+    }
+
+    body.story-focus .story-card { cursor: zoom-in; }
+    body.story-focus .story-card.expanded { cursor: zoom-out; }
+
+
     /* ------------------------------------------------------------------ */
     .story-cell {
       position: relative;
@@ -367,7 +411,7 @@
     .story-card.expanded {
       position: absolute;
       z-index: 200;
-      width: 320px;
+      width: 40vw;
       min-height: 200px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.25);
       opacity: 1 !important;
@@ -475,7 +519,11 @@
       <button class="zoom-btn" data-zoom="1" title="Overview">⊟ Overview</button>
       <button class="zoom-btn active" data-zoom="2" title="Map">⊞ Map</button>
       <button class="zoom-btn" data-zoom="3" title="Detail">⊕ Detail</button>
-      <button class="zoom-btn" id="focus-mode-btn" title="Story focus mode">◎ Focus</button>
+      <label class="toggle-label">
+        <input type="checkbox" id="focus-mode-toggle">
+        <span class="toggle-track"></span>
+        ◎ Focus
+      </label>
       <select class="focus-select" id="release-focus" title="Focus on release">
         <option value="all">All releases</option>
         {% for release in document.releases %}
@@ -623,12 +671,12 @@
 
     // Story focus mode
     let focusModeActive = false;
-    const focusBtn = document.getElementById('focus-mode-btn');
+    const focusToggle = document.getElementById('focus-mode-toggle');
     const table = document.querySelector('.story-map');
 
-    focusBtn.addEventListener('click', () => {
-      focusModeActive = !focusModeActive;
-      focusBtn.classList.toggle('active', focusModeActive);
+    focusToggle.addEventListener('change', () => {
+      focusModeActive = focusToggle.checked;
+      document.body.classList.toggle('story-focus', focusModeActive);
       if (!focusModeActive) collapseAll();
     });
 
