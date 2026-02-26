@@ -343,7 +343,57 @@
     }
 
     /* ------------------------------------------------------------------ */
-    /* Collapsible sections                                                  */
+    /* Expanded story card                                                   */
+    /* ------------------------------------------------------------------ */
+    .story-cell {
+      position: relative;
+    }
+
+    .story-map.has-expanded .story-card:not(.expanded) {
+      opacity: 0.2;
+    }
+
+    .story-map.has-expanded .activity-header,
+    .story-map.has-expanded .task-header,
+    .story-map.has-expanded .release-label {
+      opacity: 0.2;
+    }
+
+    .story-card {
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+
+    .story-card.expanded {
+      position: absolute;
+      z-index: 200;
+      width: 320px;
+      min-height: 200px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      opacity: 1 !important;
+      padding: 1rem 1.2rem;
+      font-size: 0.9rem;
+    }
+
+    .story-card.expanded .story-name {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .story-card.expanded .story-description {
+      display: block !important;
+      font-size: 0.85rem;
+    }
+
+    .story-card.expanded .story-rest {
+      display: block !important;
+    }
+
+    .story-card.expanded .story-meta {
+      margin-top: 0.75rem;
+    }
+
+
     /* ------------------------------------------------------------------ */
     details { margin-bottom: 2rem; }
 
@@ -425,6 +475,7 @@
       <button class="zoom-btn" data-zoom="1" title="Overview">⊟ Overview</button>
       <button class="zoom-btn active" data-zoom="2" title="Map">⊞ Map</button>
       <button class="zoom-btn" data-zoom="3" title="Detail">⊕ Detail</button>
+      <button class="zoom-btn" id="focus-mode-btn" title="Story focus mode">◎ Focus</button>
       <select class="focus-select" id="release-focus" title="Focus on release">
         <option value="all">All releases</option>
         {% for release in document.releases %}
@@ -559,7 +610,7 @@
       document.querySelector('.zoom-btn[data-zoom="' + level + '"]').classList.add('active');
     }
 
-    document.querySelectorAll('.zoom-btn').forEach(btn => {
+    document.querySelectorAll('.zoom-btn[data-zoom]').forEach(btn => {
       btn.addEventListener('click', () => setZoom(btn.dataset.zoom));
     });
 
@@ -568,6 +619,64 @@
       if (this.value !== 'all') {
         document.body.classList.add('focus-' + this.value);
       }
+    });
+
+    // Story focus mode
+    let focusModeActive = false;
+    const focusBtn = document.getElementById('focus-mode-btn');
+    const table = document.querySelector('.story-map');
+
+    focusBtn.addEventListener('click', () => {
+      focusModeActive = !focusModeActive;
+      focusBtn.classList.toggle('active', focusModeActive);
+      if (!focusModeActive) collapseAll();
+    });
+
+    function collapseAll() {
+      document.querySelectorAll('.story-card.expanded').forEach(c => {
+        c.classList.remove('expanded');
+        c.style.left = '';
+      });
+      table.classList.remove('has-expanded');
+    }
+
+    function expandCard(card) {
+      collapseAll();
+      card.classList.add('expanded');
+      table.classList.add('has-expanded');
+
+      // edge detection: shift card left if it overflows viewport
+      const rect = card.getBoundingClientRect();
+      const overflow = rect.right - window.innerWidth + 16;
+      if (overflow > 0) {
+        card.style.left = (-overflow) + 'px';
+      }
+
+      // scroll card into view smoothly
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    }
+
+    document.querySelectorAll('.story-card').forEach(card => {
+      // prevent link clicks from triggering expand/collapse
+      card.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', e => e.stopPropagation());
+      });
+
+      card.addEventListener('click', (e) => {
+        if (!focusModeActive) return;
+        const isExpanded = card.classList.contains('expanded');
+        if (isExpanded) {
+          collapseAll();
+        } else {
+          expandCard(card);
+          e.stopPropagation();
+        }
+      });
+    });
+
+    // click outside collapses
+    document.addEventListener('click', () => {
+      if (focusModeActive) collapseAll();
     });
   </script>
 </body>
