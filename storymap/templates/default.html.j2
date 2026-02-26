@@ -387,6 +387,11 @@
     body.story-focus .story-card { cursor: zoom-in; }
     body.story-focus .story-card.expanded { cursor: zoom-out; }
 
+    {% for release in document.releases %}
+    body.story-focus.focus-{{ loop.index0 }} tr.release-row:not([data-release="{{ loop.index0 }}"]) .story-card {
+      cursor: default;
+    }
+    {% endfor %}
 
     /* ------------------------------------------------------------------ */
     .story-cell {
@@ -522,7 +527,7 @@
       <label class="toggle-label">
         <input type="checkbox" id="focus-mode-toggle">
         <span class="toggle-track"></span>
-        ◎ Focus
+        🔬 Story Lens
       </label>
       <select class="focus-select" id="release-focus" title="Focus on release">
         <option value="all">All releases</option>
@@ -712,6 +717,14 @@
 
       card.addEventListener('click', (e) => {
         if (!focusModeActive) return;
+
+        // if a release is focused, only allow expanding stories in that release
+        const focusedRelease = document.getElementById('release-focus').value;
+        if (focusedRelease !== 'all') {
+          const row = card.closest('tr.release-row');
+          if (!row || row.dataset.release !== focusedRelease) return;
+        }
+
         const isExpanded = card.classList.contains('expanded');
         if (isExpanded) {
           collapseAll();
