@@ -383,3 +383,67 @@ class TestRendererXSS:
         )
         html = StorymapRenderer().render(doc)
         assert "<script>x</script>" not in html
+
+
+# ---------------------------------------------------------------------------
+# Renderer — image embedding
+# ---------------------------------------------------------------------------
+
+
+class TestRendererImageEmbedding:
+    def test_local_image_embedded_as_base64(self, renderer, tmp_path):
+        # create a tiny 1x1 PNG
+        import base64
+        png_bytes = base64.b64decode(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+        )
+        img_path = tmp_path / "test.png"
+        img_path.write_bytes(png_bytes)
+
+        doc = StorymapDocument(
+            releases=[Release(name="MVP")],
+            activities=[Activity(name="A", tasks=[
+                Task(name="T", story_groups=[[
+                    Story(name="S", description=f"![img](test.png)", fields={})
+                ]])
+            ])]
+        )
+        html = renderer.render(doc, source_dir=tmp_path)
+        assert 'src="data:image/png;base64,' in html
+        assert 'src="test.png"' not in html
+
+    def test_remote_image_not_embedded(self, renderer, full_document):
+        doc = StorymapDocument(
+            releases=[Release(name="MVP")],
+            activities=[Activity(name="A", tasks=[
+                Task(name="T", story_groups=[[
+                    Story(name="S", description="![img](https://example.com/img.png)", fields={})
+                ]])
+            ])]
+        )
+        html = renderer.render(doc, source_dir=None)
+        assert 'src="https://example.com/img.png"' in html
+
+    def test_missing_image_left_as_is(self, renderer, tmp_path):
+        doc = StorymapDocument(
+            releases=[Release(name="MVP")],
+            activities=[Activity(name="A", tasks=[
+                Task(name="T", story_groups=[[
+                    Story(name="S", description="![img](missing.png)", fields={})
+                ]])
+            ])]
+        )
+        html = renderer.render(doc, source_dir=tmp_path)
+        assert 'src="missing.png"' in html
+
+    def test_no_source_dir_leaves_images_as_is(self, renderer):
+        doc = StorymapDocument(
+            releases=[Release(name="MVP")],
+            activities=[Activity(name="A", tasks=[
+                Task(name="T", story_groups=[[
+                    Story(name="S", description="![img](local.png)", fields={})
+                ]])
+            ])]
+        )
+        html = renderer.render(doc, source_dir=None)
+        assert 'src="local.png"' in html

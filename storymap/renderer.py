@@ -9,6 +9,9 @@ Custom status_colors and ui_colors dicts can be passed to render() to
 override the defaults without touching the template.
 """
 
+import base64
+import mimetypes
+import re
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
@@ -48,6 +51,30 @@ def _make_render_md() -> tuple:
     return render_md, render_md_intro, render_md_rest
 
 
+def _embed_images(html: str, source_dir: Path) -> str:
+    """
+    Replace local <img src="..."> paths with base64 data URIs.
+    Remote URLs (http/https) and data URIs are left unchanged.
+    Missing files are warned and left as-is.
+    """
+    def replace_src(match: re.Match) -> str:
+        src = match.group(1)
+        if src.startswith(("http://", "https://", "data:")):
+            return match.group(0)
+        img_path = (source_dir / src).resolve()
+        if not img_path.exists():
+            click_echo = __import__("click").echo
+            click_echo(f"⚠ Image not found: {img_path}", err=True)
+            return match.group(0)
+        mime, _ = mimetypes.guess_type(str(img_path))
+        mime = mime or "image/png"
+        data = base64.b64encode(img_path.read_bytes()).decode("ascii")
+        return f'src="data:{mime};base64,{data}"'
+
+    return re.sub(r'src="([^"]+)"', replace_src, html)
+
+
+
 def _darken(hex_color: str, amount: int = 40) -> str:
     """
     Darken a #RRGGBB hex color by subtracting `amount` from each channel.
@@ -84,6 +111,7 @@ class StorymapRenderer:
         template_path: Path | None = None,
         status_colors: dict[str, str] | None = None,
         ui_colors: dict[str, str] | None = None,
+        source_dir: Path | None = None,
     ) -> str:
         """
         Render document to HTML.
@@ -96,6 +124,8 @@ class StorymapRenderer:
                            Merged on top of DEFAULT_STATUS_COLORS.
             ui_colors:     Override dict for structural UI colors.
                            Merged on top of DEFAULT_UI_COLORS.
+            source_dir:    Directory of the source .md file, used to resolve
+                           relative image paths for base64 embedding.
 
         Returns:
             A self-contained HTML string.
@@ -112,13 +142,13 @@ class StorymapRenderer:
 
         env = _make_jinja_env(template_dir)
         template = env.get_template(template_name)
-
-        # Build a release-index-aware proxy for use inside the template.
-        # Jinja2 loop.index0 is scoped to the innermost loop, so we pass
-        # the index as a callable context variable instead.
         context = _build_context(document, resolved_status_colors, resolved_ui_colors)
+        html = template.render(**context)
 
-        return template.render(**context)
+        if source_dir is not None:
+            html = _embed_images(html, source_dir)
+
+        return html
 
 
 def _build_context(
