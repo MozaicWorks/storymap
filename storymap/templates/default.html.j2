@@ -606,13 +606,12 @@
 
       {# Release swimlane rows #}
       {% for release in document.releases %}
-      {% set release_idx = loop.index0 %}
-      <tr class="release-row {% if loop.first %}current-release{% endif %}" data-release="{{ release_idx }}">
+      <tr class="release-row {% if loop.first %}current-release{% endif %}" data-release="{{ loop.index0 }}">
         <td class="release-label">{{ release.name }}</td>
         {% for activity in document.activities %}
           {% for task in activity.tasks %}
           <td class="story-cell {% if loop.last %}activity-last-task{% endif %}">
-            {% for story in task.stories_for_release(release_idx) %}
+            {% for story in task.stories_for_release(release.name) %}
             {% set story_color = story.status_color(status_colors) %}
             <div class="story-card" style="background: {{ story_color }}; border-left-color: {{ story_color | darken }};">
               <div class="story-name">{{ story.name }}</div>
@@ -669,8 +668,14 @@
 
     document.getElementById('release-focus').addEventListener('change', function() {
       document.body.className = document.body.className.replace(/\s*focus-\d+/, '');
+      document.querySelectorAll('tr.release-row').forEach(tr => tr.classList.remove('current-release'));
       if (this.value !== 'all') {
         document.body.classList.add('focus-' + this.value);
+        const target = document.querySelector('tr.release-row[data-release="' + this.value + '"]');
+        if (target) target.classList.add('current-release');
+      } else {
+        const first = document.querySelector('tr.release-row');
+        if (first) first.classList.add('current-release');
       }
     });
 

@@ -45,20 +45,17 @@ API-first mindset.
 # Map
 ## User Management
 ### Authentication
-#### Sign in [status:: done] [persona:: Margie the Manager]
+#### Sign in [status:: done] [persona:: Margie the Manager] [release:: MVP]
 User can log in with email and password.
 See [issue #1](https://github.com/org/repo/issues/1)
----
-#### Password reset [status:: in-progress] [deadline:: 2026-03-01]
+#### Password reset [status:: in-progress] [deadline:: 2026-03-01] [release:: Beta]
 ### Profile
-#### Edit profile
----
-#### Upload avatar [status:: blocked]
+#### Edit profile [release:: MVP]
+#### Upload avatar [status:: blocked] [release:: Beta]
 Blocked by storage decision.
 ## Reporting
 ### Dashboard
-#### View summary [status:: done]
----
+#### View summary [status:: done] [release:: MVP]
 """
 
 
@@ -243,7 +240,7 @@ class TestRendererStatusColors:
                     tasks=[
                         Task(
                             name="T",
-                            story_groups=[[Story(name="S", fields={"status": "custom-status"})]],
+                            stories=[Story(name="S", fields={"status": "custom-status", "release": "R1"})],
                         )
                     ],
                 )
@@ -338,9 +335,7 @@ class TestRendererXSS:
         doc = StorymapDocument(
             releases=[Release(name="MVP")],
             activities=[Activity(name="A", tasks=[
-                Task(name="T", story_groups=[[
-                    Story(name='<script>alert(1)</script>', fields={})
-                ]])
+                Task(name="T", stories=[Story(name='<script>alert(1)</script>', fields={"release": "MVP"})])
             ])]
         )
         html = StorymapRenderer().render(doc)
@@ -360,13 +355,11 @@ class TestRendererXSS:
         doc = StorymapDocument(
             releases=[Release(name="MVP")],
             activities=[Activity(name="A", tasks=[
-                Task(name="T", story_groups=[[
-                    Story(
+                Task(name="T", stories=[Story(
                         name="S",
                         description="See <!-- internal note --> for context.",
-                        fields={}
-                    )
-                ]])
+                        fields={"release": "MVP"}
+                    )])
             ])]
         )
         html = StorymapRenderer().render(doc)
@@ -376,9 +369,7 @@ class TestRendererXSS:
         doc = StorymapDocument(
             releases=[Release(name="MVP")],
             activities=[Activity(name="A", tasks=[
-                Task(name="T", story_groups=[[
-                    Story(name="S", fields={"status": "<script>x</script>"})
-                ]])
+                Task(name="T", stories=[Story(name="S", fields={"status": "<script>x</script>"})])
             ])]
         )
         html = StorymapRenderer().render(doc)
@@ -403,9 +394,7 @@ class TestRendererImageEmbedding:
         doc = StorymapDocument(
             releases=[Release(name="MVP")],
             activities=[Activity(name="A", tasks=[
-                Task(name="T", story_groups=[[
-                    Story(name="S", description=f"![img](test.png)", fields={})
-                ]])
+                Task(name="T", stories=[Story(name="S", description=f"![img](test.png)", fields={"release": "MVP"})])
             ])]
         )
         html = renderer.render(doc, source_dir=tmp_path)
@@ -416,9 +405,7 @@ class TestRendererImageEmbedding:
         doc = StorymapDocument(
             releases=[Release(name="MVP")],
             activities=[Activity(name="A", tasks=[
-                Task(name="T", story_groups=[[
-                    Story(name="S", description="![img](https://example.com/img.png)", fields={})
-                ]])
+                Task(name="T", stories=[Story(name="S", description="![img](https://example.com/img.png)", fields={"release": "MVP"})])
             ])]
         )
         html = renderer.render(doc, source_dir=None)
@@ -428,9 +415,7 @@ class TestRendererImageEmbedding:
         doc = StorymapDocument(
             releases=[Release(name="MVP")],
             activities=[Activity(name="A", tasks=[
-                Task(name="T", story_groups=[[
-                    Story(name="S", description="![img](missing.png)", fields={})
-                ]])
+                Task(name="T", stories=[Story(name="S", description="![img](missing.png)", fields={"release": "MVP"})])
             ])]
         )
         html = renderer.render(doc, source_dir=tmp_path)
@@ -440,9 +425,7 @@ class TestRendererImageEmbedding:
         doc = StorymapDocument(
             releases=[Release(name="MVP")],
             activities=[Activity(name="A", tasks=[
-                Task(name="T", story_groups=[[
-                    Story(name="S", description="![img](local.png)", fields={})
-                ]])
+                Task(name="T", stories=[Story(name="S", description="![img](local.png)", fields={"release": "MVP"})])
             ])]
         )
         html = renderer.render(doc, source_dir=None)

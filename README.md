@@ -2,7 +2,7 @@
 
 Generate user story maps from markdown. Write your product spec as a readable
 document — personas, releases, activities, tasks, and stories — and render it
-as a styled HTML page.
+as a styled, interactive HTML page.
 
 ## Installation
 
@@ -19,6 +19,9 @@ storymap render mymap.md        # → mymap.html (same directory)
 storymap render mymap.md -o out # → out/mymap.html
 ```
 
+The output is a single self-contained HTML file. Local images referenced in
+story descriptions are embedded as base64 data URIs — no external files needed.
+
 **PDF output:** open the generated HTML in a browser and use print-to-PDF
 (Ctrl+P → Save as PDF). The HTML includes print-optimised CSS for landscape
 layout and color preservation.
@@ -27,7 +30,7 @@ layout and color preservation.
 
 A storymap file is a standard markdown document with three reserved top-level
 sections: `# Releases`, `# Personas`, and `# Map`. Any other `#` heading is
-treated as the document title (first one) or passed through to the output.
+treated as the document title (first one) or ignored.
 
 ```markdown
 # My Product
@@ -50,19 +53,15 @@ Margie manages a team of 8 and primarily uses the app on mobile.
 # Map
 ## User Management
 ### Authentication
-#### Sign in [status:: done] [persona:: Margie the Manager]
+#### Sign in [status:: done] [persona:: Margie the Manager] [release:: MVP]
 User can log in with email and password.
 
-> release Beta
-
-#### Password reset [status:: in-progress] [deadline:: 2026-03-01]
+#### Password reset [status:: in-progress] [deadline:: 2026-03-01] [release:: Beta]
 
 ### Profile
-#### Edit profile [status:: done]
+#### Edit profile [status:: done] [release:: MVP]
 
-> release Beta
-
-#### Upload avatar [status:: blocked]
+#### Upload avatar [status:: blocked] [release:: Beta]
 Blocked pending storage provider decision.
 ```
 
@@ -84,21 +83,22 @@ Section names are case-insensitive.
 #### Story        (card in a swimlane)
 ```
 
-Use `> release` on its own line to advance to the next release swimlane within
-a task. Annotate it for readability — anything after `release` is ignored:
+### Assigning stories to releases
+
+Use the `[release:: name]` field on each story to assign it to a release
+swimlane. The name must match a release defined in the `# Releases` section.
+Stories without a `[release::]` field are parsed but not shown in any swimlane.
 
 ```markdown
 ### Authentication
-#### Sign in          ← Release 1 (MVP)
-#### Remember me      ← Release 1 (MVP)
-> release Beta
-#### SSO              ← Release 2 (Beta)
-> release GA
-                      ← Release 3 empty for this task
+#### Sign in [status:: done] [release:: MVP]
+#### Remember me [status:: done] [release:: MVP]
+#### SSO [status:: not-started] [release:: Beta]
+#### SAML [status:: not-started] [release:: GA]
 ```
 
-Keep `> release` count consistent across all tasks — mismatched counts produce
-misaligned swimlane rows.
+This is more explicit than positional separators — each story carries its own
+release assignment regardless of order in the file.
 
 ### Story fields
 
@@ -106,12 +106,13 @@ Stories support optional inline fields using `[key:: value]` syntax.
 Fields appear as badges on the rendered story card.
 
 ```markdown
-#### Story name [status:: done] [persona:: Margie the Manager] [deadline:: 2026-03-01]
+#### Story name [status:: done] [persona:: Margie the Manager] [deadline:: 2026-03-01] [release:: MVP]
 ```
 
 | Field | Values | Default |
 |---|---|---|
 | `status` | `not-started`, `in-progress`, `done`, `blocked` | `not-started` |
+| `release` | Release name from `# Releases` section | — |
 | `persona` | Any string matching a persona name | — |
 | `deadline` | ISO date `YYYY-MM-DD` | — |
 
@@ -120,8 +121,45 @@ Any other `[key:: value]` field is accepted and rendered as a badge.
 ### Story descriptions
 
 Markdown content following a `#### Story` heading and before the next heading
-or `> release` separator is treated as the story description. Descriptions
-support standard markdown: bold, italics, links, lists.
+is treated as the story description. Descriptions support standard markdown:
+bold, italics, links, lists, and images.
+
+The first paragraph is always visible on the story card. Additional paragraphs
+(separated by a blank line) are shown only in Detail zoom level.
+
+```markdown
+#### Sign in [status:: done] [release:: MVP]
+User can log in with email and password.
+
+**Acceptance criteria:**
+- Given valid credentials, user is redirected to dashboard
+- Given invalid credentials, an error message is shown
+
+![wireframe](./screens/sign-in.png)
+```
+
+### Images
+
+Images in story descriptions and persona descriptions are embedded as base64
+data URIs in the output HTML, making the file fully self-contained. Paths are
+resolved relative to the source `.md` file. Remote URLs are left as-is.
+
+## Interactive HTML features
+
+The rendered HTML includes controls for navigating large maps:
+
+**Zoom levels** — three buttons in the sticky header:
+- **Overview** — story names only, compact layout
+- **Map** — story names, status badges, and first-paragraph descriptions
+- **Detail** — full descriptions and acceptance criteria expanded
+
+**Release focus** — a dropdown to highlight one release swimlane and dim
+the rest. Works independently of the zoom level.
+
+**Story Lens** — a toggle that enables click-to-zoom on individual story cards.
+When active, clicking a card expands it to ~40% of the viewport width with full
+details visible. Clicking outside collapses it. Stories in the focused release
+(if any) are the only ones that can be expanded.
 
 ## CLI reference
 
@@ -197,6 +235,8 @@ The template receives:
 | `status_colors` | `dict[str, str]` | Resolved status → hex color |
 | `ui_colors` | `dict[str, str]` | Resolved UI element → hex color |
 | `render_md` | `callable` | Render a markdown string to HTML |
+| `render_md_intro` | `callable` | Render first paragraph only |
+| `render_md_rest` | `callable` | Render everything after first paragraph |
 
 The `darken` filter is also available: `{{ color | darken }}`.
 
@@ -217,7 +257,7 @@ just test
 storymap/
 ├── model.py       — dataclasses and default color constants
 ├── parser.py      — markdown-it-py state machine parser
-├── renderer.py    — Jinja2 HTML renderer
+├── renderer.py    — Jinja2 HTML renderer with base64 image embedding
 ├── cli.py         — click CLI entry point
 └── templates/
     └── default.html.j2

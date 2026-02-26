@@ -99,35 +99,36 @@ class TestTask:
         task = Task(name="Authentication")
         assert task.name == "Authentication"
 
-    def test_story_groups_defaults_to_empty(self):
+    def test_stories_defaults_to_empty(self):
         task = Task(name="Authentication")
-        assert task.story_groups == []
+        assert task.stories == []
 
-    def test_stories_for_release_returns_correct_group(self):
-        s1 = Story(name="Login")
-        s2 = Story(name="Logout")
-        task = Task(name="Auth", story_groups=[[s1], [s2]])
-        assert task.stories_for_release(0) == [s1]
-        assert task.stories_for_release(1) == [s2]
+    def test_stories_for_release_filters_by_name(self):
+        s1 = Story(name="Login", fields={"release": "MVP"})
+        s2 = Story(name="Logout", fields={"release": "Beta"})
+        task = Task(name="Auth", stories=[s1, s2])
+        assert task.stories_for_release("MVP") == [s1]
+        assert task.stories_for_release("Beta") == [s2]
 
-    def test_stories_for_release_returns_empty_for_out_of_range(self):
-        task = Task(name="Auth", story_groups=[[Story(name="Login")]])
-        assert task.stories_for_release(5) == []
+    def test_stories_for_release_returns_empty_for_unknown_release(self):
+        task = Task(name="Auth", stories=[Story(name="Login", fields={"release": "MVP"})])
+        assert task.stories_for_release("GA") == []
 
-    def test_stories_for_release_returns_empty_when_no_groups(self):
+    def test_stories_for_release_returns_empty_when_no_stories(self):
         task = Task(name="Auth")
-        assert task.stories_for_release(0) == []
+        assert task.stories_for_release("MVP") == []
 
-    def test_story_group_can_contain_multiple_stories(self):
-        s1 = Story(name="Login")
-        s2 = Story(name="Remember me")
-        task = Task(name="Auth", story_groups=[[s1, s2]])
-        assert len(task.stories_for_release(0)) == 2
+    def test_stories_for_release_can_contain_multiple_stories(self):
+        s1 = Story(name="Login", fields={"release": "MVP"})
+        s2 = Story(name="Remember me", fields={"release": "MVP"})
+        task = Task(name="Auth", stories=[s1, s2])
+        assert len(task.stories_for_release("MVP")) == 2
 
-    def test_story_group_can_be_empty_for_a_release(self):
-        s1 = Story(name="Login")
-        task = Task(name="Auth", story_groups=[[s1], []])
-        assert task.stories_for_release(1) == []
+    def test_unassigned_stories_returns_stories_without_release(self):
+        s1 = Story(name="Login", fields={"release": "MVP"})
+        s2 = Story(name="Unplanned")
+        task = Task(name="Auth", stories=[s1, s2])
+        assert task.unassigned_stories() == [s2]
 
 
 # ---------------------------------------------------------------------------
@@ -247,9 +248,9 @@ class TestStorymapDocument:
         story = Story(
             name="Login",
             description="User can log in.",
-            fields={"status": "done", "persona": "Margie the Manager"},
+            fields={"status": "done", "persona": "Margie the Manager", "release": "MVP"},
         )
-        task = Task(name="Authentication", story_groups=[[story], []])
+        task = Task(name="Authentication", stories=[story])
         activity = Activity(name="User Management", tasks=[task])
         doc = StorymapDocument(
             title="My Product",
@@ -264,7 +265,7 @@ class TestStorymapDocument:
         assert len(doc.releases) == 2
         assert len(doc.personas) == 1
         assert len(doc.activities) == 1
-        assert doc.activities[0].tasks[0].stories_for_release(0)[0].status() == "done"
+        assert doc.activities[0].tasks[0].stories_for_release("MVP")[0].status() == "done"
 
 
 # ---------------------------------------------------------------------------

@@ -10,7 +10,8 @@ Section headings (h1) drive state transitions:
     # Map       → MAP state
 
 Within each state, h2/h3/h4 headings drive entity creation.
-`> release` on its own line separates stories into release groups within a task.
+Stories are assigned to releases via the [release:: name] field — no
+positional separators needed.
 Descriptions are extracted from raw source lines using token.map offsets,
 preserving the original markdown for downstream rendering.
 
@@ -63,13 +64,10 @@ class StorymapParser:
         current_activity: Activity | None = None
         current_task: Task | None = None
         current_story: Story | None = None
-        current_release_idx: int = 0
         desc_start: int = 0
 
         # ------------------------------------------------------------------
         # Helpers — closures over the local state variables above.
-        # Each finalizer: (1) extracts the pending description, (2) appends
-        # the entity to its parent, (3) resets the pointer to None.
         # ------------------------------------------------------------------
 
         def extract_desc(end_line: int) -> str:
@@ -82,13 +80,12 @@ class StorymapParser:
                 current_story = None
 
         def finalize_task(end_line: int) -> None:
-            nonlocal current_task, current_release_idx
+            nonlocal current_task
             if current_task is not None:
                 finalize_story(end_line)
                 if current_activity is not None:
                     current_activity.tasks.append(current_task)
                 current_task = None
-                current_release_idx = 0
 
         def finalize_activity(end_line: int) -> None:
             nonlocal current_activity
@@ -183,8 +180,7 @@ class StorymapParser:
                                 "Tasks must appear under a '## Activity' heading."
                             )
                         else:
-                            current_task = Task(name=content.strip(), story_groups=[[]])
-                            current_release_idx = 0
+                            current_task = Task(name=content.strip())
                             desc_start = token_end
 
                 elif level == 4:
@@ -199,29 +195,15 @@ class StorymapParser:
                             finalize_story(token_start)
                             name, fields = _parse_story_heading(content)
                             current_story = Story(name=name, fields=fields)
-                            _ensure_group(current_task, current_release_idx)
-                            current_task.story_groups[current_release_idx].append(
-                                current_story
-                            )
+                            current_task.stories.append(current_story)
                             desc_start = token_end
-
-            elif token.type == "blockquote_open":
-                if section == _Section.MAP and current_task is not None:
-                    # Check if the blockquote content is "release" (case-insensitive).
-                    # Peek ahead for the inline token containing the text.
-                    content = _blockquote_content(tokens, i)
-                    if content.strip().lower().startswith("release"):
-                        sep_start = _map_start(token)
-                        sep_end = _map_end(token)
-                        finalize_story(sep_start)
-                        current_release_idx += 1
-                        _ensure_group(current_task, current_release_idx)
-                        desc_start = sep_end
 
         # ------------------------------------------------------------------
         # Flush any remaining open entities after the last token.
         # ------------------------------------------------------------------
         finalize_section(len(lines))
+
+        _warn_unmatched_releases(doc)
 
         return doc
 
@@ -231,14 +213,18 @@ class StorymapParser:
 # ---------------------------------------------------------------------------
 
 
-def _blockquote_content(tokens: list, blockquote_open_index: int) -> str:
-    """Return the text content of the first inline token inside a blockquote."""
-    for token in tokens[blockquote_open_index + 1:]:
-        if token.type == "blockquote_close":
-            break
-        if token.type == "inline":
-            return token.content
-    return ""
+def _warn_unmatched_releases(doc: StorymapDocument) -> None:
+    """Warn about stories whose [release::] value doesn't match any release."""
+    release_names = {r.name for r in doc.releases}
+    for activity in doc.activities:
+        for task in activity.tasks:
+            for story in task.stories:
+                r = story.release()
+                if r is not None and r not in release_names:
+                    doc.warnings.append(
+                        f"Story '{story.name}': release '{r}' not found in "
+                        "Releases section — story will not appear in any swimlane."
+                    )
 
 
 def _heading_content(tokens: list, heading_open_index: int) -> str:
@@ -255,12 +241,6 @@ def _map_start(token) -> int:
 
 def _map_end(token) -> int:
     return token.map[1] if token.map else 0
-
-
-def _ensure_group(task: Task, index: int) -> None:
-    """Ensure task.story_groups has a list at the given index."""
-    while len(task.story_groups) <= index:
-        task.story_groups.append([])
 
 
 def _extract_lines(lines: list[str], start: int, end: int) -> str:
@@ -283,8 +263,8 @@ def _parse_story_heading(text: str) -> tuple[str, dict[str, str]]:
     Split a story heading into its display name and [key:: value] fields.
 
     Example:
-        "Login [status:: done] [persona:: Margie]"
-        → ("Login", {"status": "done", "persona": "Margie"})
+        "Login [status:: done] [release:: MVP]"
+        → ("Login", {"status": "done", "release": "MVP"})
     """
     fields: dict[str, str] = {}
     for match in FIELD_PATTERN.finditer(text):

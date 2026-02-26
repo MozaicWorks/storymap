@@ -38,12 +38,11 @@ First public release.
 # Map
 ## User Management
 ### Authentication
-#### Sign in [status:: done] [persona:: Margie the Manager]
+#### Sign in [status:: done] [persona:: Margie the Manager] [release:: MVP]
 User can log in.
-> release
-#### Password reset [status:: in-progress]
+#### Password reset [status:: in-progress] [release:: Beta]
 ### Profile
-#### Edit profile
+#### Edit profile [release:: MVP]
 """
 
 
@@ -265,14 +264,13 @@ class TestCliInit:
             content = Path("storymap.md").read_text()
             assert "# Releases" in content
             assert "# Map" in content
-            assert "> release" in content
+            assert "release::" in content
 
     def test_default_file_contains_format_comment(self, runner, tmp_path):
         with runner.isolated_filesystem(temp_dir=tmp_path):
             runner.invoke(main, ["init"])
             content = Path("storymap.md").read_text()
-            assert "> release" in content
-            assert "advance" in content.lower()
+            assert "release::" in content
 
     def test_creates_named_file(self, runner, tmp_path):
         with runner.isolated_filesystem(temp_dir=tmp_path):

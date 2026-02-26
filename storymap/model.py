@@ -30,11 +30,14 @@ DEFAULT_UI_COLORS: dict[str, str] = {
 @dataclass
 class Story:
     """
-    A single user story within a task and release.
+    A single user story within a task.
 
     Fields are stored as a free-form dict so that new [key:: value]
-    annotations (status, persona, deadline, …) can be added without
+    annotations (status, persona, deadline, release, …) can be added without
     changing the model.
+
+    The release a story belongs to is stored as fields["release"] and must
+    match a release name defined in the Releases section.
     """
 
     name: str
@@ -51,26 +54,24 @@ class Story:
     ) -> str:
         return color_map.get(self.status(), fallback)
 
+    def release(self) -> str | None:
+        return self.fields.get("release")
+
 
 @dataclass
 class Task:
-    """
-    A task belonging to an activity.
-
-    story_groups is a list of lists indexed by release position:
-    story_groups[0] → stories in Release 1
-    story_groups[1] → stories in Release 2
-    …
-    Empty lists represent releases with no stories for this task.
-    """
+    """A task belonging to an activity, containing a flat list of stories."""
 
     name: str
-    story_groups: list[list[Story]] = field(default_factory=list)
+    stories: list[Story] = field(default_factory=list)
 
-    def stories_for_release(self, release_index: int) -> list[Story]:
-        if release_index < len(self.story_groups):
-            return self.story_groups[release_index]
-        return []
+    def stories_for_release(self, release_name: str) -> list[Story]:
+        """Return stories assigned to the given release name."""
+        return [s for s in self.stories if s.release() == release_name]
+
+    def unassigned_stories(self) -> list[Story]:
+        """Return stories with no release field."""
+        return [s for s in self.stories if s.release() is None]
 
 
 @dataclass
@@ -94,8 +95,7 @@ class Persona:
     """
     A UX persona with a full markdown description.
 
-    The description may contain lists, links, and pandoc-style
-    image references (e.g. ![Margie](margie.jpg){width=200px}).
+    The description may contain lists, links, and image references.
     """
 
     name: str

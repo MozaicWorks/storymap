@@ -44,20 +44,17 @@ API-first mindset.
 # Map
 ## User Management
 ### Authentication
-#### Sign in [status:: done] [persona:: Margie the Manager]
+#### Sign in [status:: done] [persona:: Margie the Manager] [release:: MVP]
 User can log in with email and password.
 See [issue #1](https://github.com/org/repo/issues/1)
-> release
-#### Password reset [status:: in-progress] [deadline:: 2026-03-01]
+#### Password reset [status:: in-progress] [deadline:: 2026-03-01] [release:: Beta]
 ### Profile
-#### Edit profile
-> release
-#### Upload avatar [status:: blocked]
+#### Edit profile [release:: MVP]
+#### Upload avatar [status:: blocked] [release:: Beta]
 Blocked by storage decision.
 ## Reporting
 ### Dashboard
-#### View summary [status:: done]
-> release
+#### View summary [status:: done] [release:: MVP]
 """
 
 
@@ -87,17 +84,22 @@ class TestParseStoryHeading:
             "persona": "Margie the Manager",
         }
 
+    def test_release_field(self):
+        name, fields = _parse_story_heading("Sign in [status:: done] [release:: MVP]")
+        assert name == "Sign in"
+        assert fields["release"] == "MVP"
+
     def test_all_known_fields(self):
         name, fields = _parse_story_heading(
-            "Story [status:: done] [persona:: Dave] [deadline:: 2026-06-01]"
+            "Story [status:: done] [persona:: Dave] [deadline:: 2026-06-01] [release:: Beta]"
         )
         assert name == "Story"
         assert fields["status"] == "done"
         assert fields["persona"] == "Dave"
         assert fields["deadline"] == "2026-06-01"
+        assert fields["release"] == "Beta"
 
     def test_field_at_start_of_heading(self):
-        # Edge case: field appears before the name (unusual but valid)
         name, fields = _parse_story_heading("[status:: done] Sign in")
         assert name == "Sign in"
         assert fields == {"status": "done"}
@@ -225,7 +227,7 @@ class TestParserPersonas:
             "## Margie\n"
             "- **Age:** 45-55\n"
             "- **Tech:** Low\n\n"
-            "![Margie](margie.jpg){width=200px}\n\n"
+            "![Margie](margie.jpg)\n\n"
             "[Notes](https://docs.google.com/)\n\n"
             "# Map\n## A\n### T\n#### S\n"
         )
@@ -266,8 +268,8 @@ class TestParserMapStructure:
         doc = StorymapParser().parse(MINIMAL)
         task = doc.activities[0].tasks[0]
         assert task.name == "Login"
-        assert len(task.story_groups) >= 1
-        assert task.story_groups[0][0].name == "Sign in"
+        assert len(task.stories) == 1
+        assert task.stories[0].name == "Sign in"
 
     def test_empty_map_section(self):
         src = "# Releases\n## MVP\n\n# Map\n"
@@ -276,180 +278,141 @@ class TestParserMapStructure:
 
 
 # ---------------------------------------------------------------------------
-# StorymapParser — release groups (> release separators)
+# StorymapParser — release field grouping
 # ---------------------------------------------------------------------------
 
 
-class TestParserReleaseGroups:
-    def test_no_separator_creates_one_group(self):
+class TestParserReleaseField:
+    def test_story_with_release_field(self):
         src = (
-            "# Releases\n## R1\n\n"
+            "# Releases\n## MVP\n\n"
+            "# Map\n## A\n### T\n"
+            "#### Story 1 [release:: MVP]\n"
+        )
+        doc = StorymapParser().parse(src)
+        task = doc.activities[0].tasks[0]
+        assert task.stories[0].release() == "MVP"
+
+    def test_stories_for_release_filters_correctly(self):
+        src = (
+            "# Releases\n## MVP\n## Beta\n\n"
+            "# Map\n## A\n### T\n"
+            "#### Story 1 [release:: MVP]\n"
+            "#### Story 2 [release:: Beta]\n"
+            "#### Story 3 [release:: MVP]\n"
+        )
+        doc = StorymapParser().parse(src)
+        task = doc.activities[0].tasks[0]
+        mvp = task.stories_for_release("MVP")
+        beta = task.stories_for_release("Beta")
+        assert [s.name for s in mvp] == ["Story 1", "Story 3"]
+        assert [s.name for s in beta] == ["Story 2"]
+
+    def test_story_without_release_is_unassigned(self):
+        src = (
+            "# Releases\n## MVP\n\n"
             "# Map\n## A\n### T\n"
             "#### Story 1\n"
         )
         doc = StorymapParser().parse(src)
         task = doc.activities[0].tasks[0]
-        assert len(task.story_groups) == 1
-        assert task.story_groups[0][0].name == "Story 1"
+        assert task.stories[0].release() is None
+        assert len(task.unassigned_stories()) == 1
 
-    def test_one_separator_creates_two_groups(self):
+    def test_unmatched_release_produces_warning(self):
         src = (
-            "# Releases\n## R1\n## R2\n\n"
+            "# Releases\n## MVP\n\n"
             "# Map\n## A\n### T\n"
-            "#### Story 1\n"
-            ">release\n"
-            "#### Story 2\n"
+            "#### Story 1 [release:: NonExistent]\n"
         )
         doc = StorymapParser().parse(src)
-        task = doc.activities[0].tasks[0]
-        assert len(task.story_groups) == 2
-        assert task.story_groups[0][0].name == "Story 1"
-        assert task.story_groups[1][0].name == "Story 2"
+        assert any("NonExistent" in w for w in doc.warnings)
 
-    def test_separator_before_first_story_creates_empty_first_group(self):
+    def test_multiple_tasks_independent_release_fields(self):
         src = (
-            "# Releases\n## R1\n## R2\n\n"
-            "# Map\n## A\n### T\n"
-            ">release\n"
-            "#### Story 1\n"
-        )
-        doc = StorymapParser().parse(src)
-        task = doc.activities[0].tasks[0]
-        assert task.story_groups[0] == []
-        assert task.story_groups[1][0].name == "Story 1"
-
-    def test_multiple_stories_in_one_group(self):
-        src = (
-            "# Releases\n## R1\n## R2\n\n"
-            "# Map\n## A\n### T\n"
-            "#### Story 1\n"
-            "#### Story 2\n"
-            ">release\n"
-            "#### Story 3\n"
-        )
-        doc = StorymapParser().parse(src)
-        task = doc.activities[0].tasks[0]
-        assert len(task.story_groups[0]) == 2
-        assert task.story_groups[0][0].name == "Story 1"
-        assert task.story_groups[0][1].name == "Story 2"
-        assert task.story_groups[1][0].name == "Story 3"
-
-    def test_separator_without_following_story_creates_empty_group(self):
-        src = (
-            "# Releases\n## R1\n## R2\n\n"
-            "# Map\n## A\n### T\n"
-            "#### Story 1\n"
-            ">release\n"
-        )
-        doc = StorymapParser().parse(src)
-        task = doc.activities[0].tasks[0]
-        assert task.story_groups[0][0].name == "Story 1"
-        assert task.story_groups[1] == []
-
-    def test_separator_resets_between_tasks(self):
-        src = (
-            "# Releases\n## R1\n## R2\n\n"
+            "# Releases\n## MVP\n## Beta\n\n"
             "# Map\n## A\n"
             "### Task 1\n"
-            "#### S1\n> release\n#### S2\n"
+            "#### S1 [release:: MVP]\n"
+            "#### S2 [release:: Beta]\n"
             "### Task 2\n"
-            "#### S3\n"
+            "#### S3 [release:: Beta]\n"
         )
         doc = StorymapParser().parse(src)
         t1 = doc.activities[0].tasks[0]
         t2 = doc.activities[0].tasks[1]
-        assert len(t1.story_groups) == 2
-        assert len(t2.story_groups) == 1
-        assert t2.story_groups[0][0].name == "S3"
+        assert len(t1.stories_for_release("MVP")) == 1
+        assert len(t1.stories_for_release("Beta")) == 1
+        assert len(t2.stories_for_release("Beta")) == 1
+        assert len(t2.stories_for_release("MVP")) == 0
 
-    def test_annotated_separator_is_recognised(self):
+    def test_stories_for_release_returns_empty_for_unknown_release(self):
         src = (
-            "# Releases\n## R1\n## R2\n\n"
+            "# Releases\n## MVP\n\n"
             "# Map\n## A\n### T\n"
-            "#### Story 1\n"
-            "> release R2\n"
-            "#### Story 2\n"
+            "#### Story 1 [release:: MVP]\n"
         )
         doc = StorymapParser().parse(src)
         task = doc.activities[0].tasks[0]
-        assert len(task.story_groups) == 2
-        assert task.story_groups[1][0].name == "Story 2"
+        assert task.stories_for_release("Beta") == []
 
-    def test_annotated_separator_with_longer_label(self):
-        src = (
-            "# Releases\n## R1\n## R2\n\n"
-            "# Map\n## A\n### T\n"
-            "#### Story 1\n"
-            "> release end of sprint 3\n"
-            "#### Story 2\n"
-        )
-        doc = StorymapParser().parse(src)
-        task = doc.activities[0].tasks[0]
-        assert len(task.story_groups) == 2
 
-    def test_annotated_separator_case_insensitive(self):
-        src = (
-            "# Releases\n## R1\n## R2\n\n"
-            "# Map\n## A\n### T\n"
-            "#### Story 1\n"
-            "> Release MVP\n"
-            "#### Story 2\n"
-        )
-        doc = StorymapParser().parse(src)
-        task = doc.activities[0].tasks[0]
-        assert len(task.story_groups) == 2
-
+# ---------------------------------------------------------------------------
+# StorymapParser — story fields
+# ---------------------------------------------------------------------------
 
 
 class TestParserStoryFields:
     def test_story_without_fields(self):
         doc = StorymapParser().parse(MINIMAL)
-        story = doc.activities[0].tasks[0].story_groups[0][0]
+        story = doc.activities[0].tasks[0].stories[0]
         assert story.fields == {}
         assert story.status() == "not-started"
 
     def test_story_status_field(self):
         doc = StorymapParser().parse(FULL)
-        story = doc.activities[0].tasks[0].story_groups[0][0]
+        story = doc.activities[0].tasks[0].stories[0]
         assert story.fields["status"] == "done"
 
     def test_story_persona_field(self):
         doc = StorymapParser().parse(FULL)
-        story = doc.activities[0].tasks[0].story_groups[0][0]
+        story = doc.activities[0].tasks[0].stories[0]
         assert story.fields["persona"] == "Margie the Manager"
+
+    def test_story_release_field(self):
+        doc = StorymapParser().parse(FULL)
+        story = doc.activities[0].tasks[0].stories[0]
+        assert story.fields["release"] == "MVP"
 
     def test_story_deadline_field(self):
         doc = StorymapParser().parse(FULL)
-        # "Password reset" is in release group 1 > release)
-        story = doc.activities[0].tasks[0].story_groups[1][0]
+        story = doc.activities[0].tasks[0].stories[1]
         assert story.fields["deadline"] == "2026-03-01"
 
     def test_story_with_description(self):
         doc = StorymapParser().parse(FULL)
-        story = doc.activities[0].tasks[0].story_groups[0][0]
+        story = doc.activities[0].tasks[0].stories[0]
         assert "log in with email" in story.description
 
     def test_story_description_with_link(self):
         doc = StorymapParser().parse(FULL)
-        story = doc.activities[0].tasks[0].story_groups[0][0]
+        story = doc.activities[0].tasks[0].stories[0]
         assert "[issue #1]" in story.description
 
     def test_story_without_description_is_empty(self):
         doc = StorymapParser().parse(FULL)
-        # "Password reset" has no description body
-        story = doc.activities[0].tasks[0].story_groups[1][0]
+        story = doc.activities[0].tasks[0].stories[1]
         assert story.description == ""
 
     def test_story_name_strips_fields(self):
         doc = StorymapParser().parse(FULL)
-        story = doc.activities[0].tasks[0].story_groups[0][0]
+        story = doc.activities[0].tasks[0].stories[0]
         assert story.name == "Sign in"
         assert "[status" not in story.name
 
     def test_blocked_story_with_description(self):
         doc = StorymapParser().parse(FULL)
-        # "Upload avatar" is in profile task, release group 1
-        story = doc.activities[0].tasks[1].story_groups[1][0]
+        story = doc.activities[0].tasks[1].stories[1]
         assert story.name == "Upload avatar"
         assert story.fields["status"] == "blocked"
         assert "storage" in story.description
@@ -482,7 +445,6 @@ class TestParserEdgeCases:
         assert len(doc.activities) == 1
 
     def test_unknown_h1_after_title_is_ignored(self):
-        """An unknown h1 that appears after the title should be ignored."""
         src = (
             "# My Product\n\n"
             "# Introduction\nSome intro text.\n\n"
@@ -502,7 +464,7 @@ class TestParserEdgeCases:
             "Second paragraph.\n"
         )
         doc = StorymapParser().parse(src)
-        story = doc.activities[0].tasks[0].story_groups[0][0]
+        story = doc.activities[0].tasks[0].stories[0]
         assert "First paragraph." in story.description
         assert "Second paragraph." in story.description
 
@@ -603,10 +565,9 @@ class TestParserTitle:
         )
         doc = StorymapParser().parse(src)
         assert len(doc.activities) == 1
-        assert doc.activities[0].tasks[0].story_groups[0][0].name == "Story"
+        assert doc.activities[0].tasks[0].stories[0].name == "Story"
 
     def test_reserved_h1_first_is_not_treated_as_title(self):
-        """If the first h1 is a reserved keyword, no title is set."""
         doc = StorymapParser().parse(MINIMAL)
         assert doc.title is None
 
@@ -694,3 +655,13 @@ class TestParserWarnings:
     def test_warnings_default_to_empty_list(self):
         doc = StorymapDocument()
         assert doc.warnings == []
+
+    def test_unmatched_release_warning(self):
+        src = (
+            "# Releases\n## MVP\n\n"
+            "# Map\n## A\n### T\n"
+            "#### Story 1 [release:: NonExistent]\n"
+        )
+        doc = StorymapParser().parse(src)
+        assert any("NonExistent" in w for w in doc.warnings)
+        assert any("not found" in w for w in doc.warnings)

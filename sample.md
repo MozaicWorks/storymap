@@ -89,20 +89,18 @@ New user can register with email and password.
 Includes email verification flow.
 See [issue #12](https://github.com/org/repo/issues/12)
 
-> release MVP
 
-#### Register via SSO [status:: in-progress] [persona:: Dave the Developer] [deadline:: 2026-04-15]
+#### Register via SSO [status:: in-progress] [persona:: Dave the Developer] [deadline:: 2026-04-15] [release:: MVP]
 Support Google and Microsoft OAuth providers.
 See [issue #34](https://github.com/org/repo/issues/34)
 
-> release Beta
 
-#### Register via SAML [status:: not-started] [persona:: Margie the Manager] [deadline:: 2026-09-01]
+#### Register via SAML [status:: not-started] [persona:: Margie the Manager] [deadline:: 2026-09-01] [release:: Beta]
 Enterprise SAML 2.0 support for large customers.
 
 ### Authentication
 
-#### Sign in [status:: done]
+#### Sign in [status:: done] [release:: Beta]
 Standard email/password login with remember-me option.
 
 **Acceptance criteria:**
@@ -111,20 +109,17 @@ Standard email/password login with remember-me option.
 - Given "remember me" checked, session persists for 30 days
 - Given 5 failed attempts, account is temporarily locked
 
-> release GA
 
-#### Forgot password [status:: done]
+#### Forgot password [status:: done] [release:: GA]
 Password reset via email token.
 See [issue #15](https://github.com/org/repo/issues/15)
 
-> release MVP
 
-#### MFA via TOTP [status:: in-progress] [deadline:: 2026-04-30]
+#### MFA via TOTP [status:: in-progress] [deadline:: 2026-04-30] [release:: MVP]
 Time-based one-time password support (Google Authenticator, Authy).
 
-> release Beta
 
-#### MFA via SMS [status:: not-started] [deadline:: 2026-09-01]
+#### MFA via SMS [status:: not-started] [deadline:: 2026-09-01] [release:: Beta]
 SMS-based one-time password as an alternative to TOTP.
 
 **Acceptance criteria:**
@@ -135,7 +130,7 @@ SMS-based one-time password as an alternative to TOTP.
 
 ### Profile
 
-#### View and edit profile [status:: done] [persona:: Nina the New User]
+#### View and edit profile [status:: done] [persona:: Nina the New User] [release:: Beta]
 User can view and update their display name, email, and bio.
 
 **Acceptance criteria:**
@@ -143,15 +138,13 @@ User can view and update their display name, email, and bio.
 - Email change triggers a re-verification flow
 - Invalid fields show inline validation errors
 
-> release GA
 
-#### Upload avatar [status:: blocked] [persona:: Nina the New User]
+#### Upload avatar [status:: blocked] [persona:: Nina the New User] [release:: GA]
 Blocked pending storage provider decision.
 See [JIRA-456](https://jira.example.com/browse/JIRA-456)
 
-> release MVP
 
-#### Delete account [status:: not-started] [deadline:: 2026-09-01]
+#### Delete account [status:: not-started] [deadline:: 2026-09-01] [release:: MVP]
 Must comply with GDPR right-to-erasure requirements.
 See [issue #78](https://github.com/org/repo/issues/78)
 
@@ -159,59 +152,51 @@ See [issue #78](https://github.com/org/repo/issues/78)
 
 ### Dashboard
 
-#### View project summary [status:: done] [persona:: Margie the Manager]
+#### View project summary [status:: done] [persona:: Margie the Manager] [release:: MVP]
 High-level status cards showing release progress.
 
-> release Beta
 
-#### Filter by release [status:: in-progress] [persona:: Margie the Manager] [deadline:: 2026-04-15]
+#### Filter by release [status:: in-progress] [persona:: Margie the Manager] [deadline:: 2026-04-15] [release:: Beta]
 
-> release GA
 
-#### Filter by persona [status:: not-started] [deadline:: 2026-06-01]
+#### Filter by persona [status:: not-started] [deadline:: 2026-06-01] [release:: GA]
 
-#### Filter by status [status:: not-started] [deadline:: 2026-06-01]
+#### Filter by status [status:: not-started] [deadline:: 2026-06-01] [release:: GA]
 
 ### Export
 
-#### Export to PDF [status:: in-progress] [persona:: Margie the Manager] [deadline:: 2026-04-30]
+#### Export to PDF [status:: in-progress] [persona:: Margie the Manager] [deadline:: 2026-04-30] [release:: GA]
 One-click PDF export of the current story map view.
 
-> release MVP
 
-#### Export to CSV [status:: not-started] [persona:: Dave the Developer] [deadline:: 2026-06-01]
+#### Export to CSV [status:: not-started] [persona:: Dave the Developer] [deadline:: 2026-06-01] [release:: MVP]
 Machine-readable export for backlog import into Jira or GitHub.
 
-> release Beta
 
-#### Export to PNG [status:: not-started] [deadline:: 2026-09-01]
+#### Export to PNG [status:: not-started] [deadline:: 2026-09-01] [release:: Beta]
 
 ## Notifications
 
 ### Email Notifications
 
-#### Notify on story status change [status:: not-started] [persona:: Margie the Manager]
+#### Notify on story status change [status:: not-started] [persona:: Margie the Manager] [release:: Beta]
 
-> release GA
 
-#### Daily digest [status:: not-started] [persona:: Margie the Manager] [deadline:: 2026-06-01]
+#### Daily digest [status:: not-started] [persona:: Margie the Manager] [deadline:: 2026-06-01] [release:: GA]
 Optional daily summary email of changes since last digest.
 
-> release MVP
 
-#### Notify on blocked stories [status:: not-started] [deadline:: 2026-09-01]
+#### Notify on blocked stories [status:: not-started] [deadline:: 2026-09-01] [release:: MVP]
 Alert assigned persona when a story is marked as blocked.
 
 ### In-app Notifications
 
-#### Show notification badge [status:: blocked]
+#### Show notification badge [status:: blocked] [release:: MVP]
 Blocked by front-end architecture decision on state management.
 See [issue #99](https://github.com/org/repo/issues/99)
 
-> release Beta
 
-#### Mark notifications as read [status:: not-started] [deadline:: 2026-06-01]
+#### Mark notifications as read [status:: not-started] [deadline:: 2026-06-01] [release:: Beta]
 
-> release GA
 
-#### Notification preferences [status:: not-started] [deadline:: 2026-09-01]
+#### Notification preferences [status:: not-started] [deadline:: 2026-09-01] [release:: GA]
