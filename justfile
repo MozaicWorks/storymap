@@ -95,7 +95,7 @@ docker-build:
     #!/usr/bin/env bash
     set -euo pipefail
     version=$({{pipenv}} run python -c "from importlib.metadata import version; print(version('storymap'))")
-    {{docker}} build -t {{image}}:${version} -t {{image}}:latest .
+    {{docker}} build -t {{image}}:${version} -t {{image}}:latest --no-cache .
 
 # Push the Docker image to ghcr.io (run docker-login first if needed)
 docker-push: docker-build

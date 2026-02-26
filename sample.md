@@ -105,6 +105,12 @@ Enterprise SAML 2.0 support for large customers.
 #### Sign in [status:: done]
 Standard email/password login with remember-me option.
 
+**Acceptance criteria:**
+- Given valid credentials, user is redirected to dashboard
+- Given invalid credentials, an error message is shown
+- Given "remember me" checked, session persists for 30 days
+- Given 5 failed attempts, account is temporarily locked
+
 > release GA
 
 #### Forgot password [status:: done]
@@ -119,10 +125,23 @@ Time-based one-time password support (Google Authenticator, Authy).
 > release Beta
 
 #### MFA via SMS [status:: not-started] [deadline:: 2026-09-01]
+SMS-based one-time password as an alternative to TOTP.
+
+**Acceptance criteria:**
+- User can enable SMS MFA from security settings
+- OTP is delivered within 30 seconds
+- OTP expires after 5 minutes
+- User can disable SMS MFA and fall back to password only
 
 ### Profile
 
 #### View and edit profile [status:: done] [persona:: Nina the New User]
+User can view and update their display name, email, and bio.
+
+**Acceptance criteria:**
+- Changes are saved on submit with a success toast
+- Email change triggers a re-verification flow
+- Invalid fields show inline validation errors
 
 > release GA
 

@@ -238,6 +238,49 @@
     }
 
     /* ------------------------------------------------------------------ */
+    /* Story details                                                         */
+    /* ------------------------------------------------------------------ */
+    .story-card details {
+      margin: 0;
+    }
+
+    .story-card details > summary {
+      list-style: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.82rem;
+      margin: 0;
+      padding: 0;
+      border: none;
+      color: inherit;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.3rem;
+    }
+
+    .story-card details > summary::-webkit-details-marker { display: none; }
+
+    .story-card details > summary::before {
+      content: "▶";
+      font-size: 0.6rem;
+      color: rgba(0,0,0,0.35);
+      transition: transform 0.15s ease;
+      display: inline-block;
+      flex-shrink: 0;
+      margin-top: 0.2rem;
+    }
+
+    .story-card details[open] > summary::before {
+      transform: rotate(90deg);
+    }
+
+    .story-card details > .story-description {
+      margin-top: 0.3rem;
+      padding-top: 0.3rem;
+      border-top: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* ------------------------------------------------------------------ */
     /* Collapsible sections                                                  */
     /* ------------------------------------------------------------------ */
     details { margin-bottom: 2rem; }
@@ -297,6 +340,7 @@
       /* details open, chevron hidden */
       details { display: block; }
       details > summary::before { display: none; }
+      .story-card details > summary::before { display: none; }
     }
   </style>
 </head>
@@ -391,9 +435,13 @@
             {% for story in task.stories_for_release(release_idx) %}
             {% set story_color = story.status_color(status_colors) %}
             <div class="story-card" style="background: {{ story_color }}; border-left-color: {{ story_color | darken }};">
-              <div class="story-name">{{ story.name }}</div>
               {% if story.description %}
-              <div class="story-description">{{ render_md(story.description) }}</div>
+              <details>
+                <summary>{{ story.name }}</summary>
+                <div class="story-description">{{ render_md(story.description) }}</div>
+              </details>
+              {% else %}
+              <div class="story-name">{{ story.name }}</div>
               {% endif %}
               {% set meta_fields = story.fields | reject_key("status") %}
               {% if story.fields or meta_fields %}
