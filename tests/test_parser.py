@@ -211,6 +211,21 @@ class TestParserReleases:
         doc = StorymapParser().parse(src)
         assert "[id::" not in doc.releases[0].name
 
+    def test_release_name_with_spaces_and_no_id_warns(self):
+        src = "# Releases\n## My Long Release\n\n# Map\n## A\n### T\n#### S\n"
+        doc = StorymapParser().parse(src)
+        assert any("My Long Release" in w and "id::" in w for w in doc.warnings)
+
+    def test_release_name_with_spaces_and_id_does_not_warn(self):
+        src = "# Releases\n## My Long Release [id:: mlr]\n\n# Map\n## A\n### T\n#### S\n"
+        doc = StorymapParser().parse(src)
+        assert not any("id::" in w for w in doc.warnings)
+
+    def test_release_name_without_spaces_does_not_warn(self):
+        src = "# Releases\n## MVP\n\n# Map\n## A\n### T\n#### S\n"
+        doc = StorymapParser().parse(src)
+        assert doc.warnings == []
+
     def test_release_description_with_markdown(self):
         src = (
             "# Releases\n"

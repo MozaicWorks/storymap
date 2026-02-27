@@ -86,19 +86,36 @@ Section names are case-insensitive.
 ### Assigning stories to releases
 
 Use the `[release:: name]` field on each story to assign it to a release
-swimlane. The name must match a release defined in the `# Releases` section.
-Stories without a `[release::]` field are parsed but not shown in any swimlane.
+swimlane. The value must match a release name (or id, see below) defined in
+`# Releases`. Stories without a `[release::]` field are parsed but not shown
+in any swimlane.
 
 ```markdown
 ### Authentication
 #### Sign in [status:: done] [release:: MVP]
-#### Remember me [status:: done] [release:: MVP]
 #### SSO [status:: not-started] [release:: Beta]
-#### SAML [status:: not-started] [release:: GA]
 ```
 
-This is more explicit than positional separators — each story carries its own
-release assignment regardless of order in the file.
+### Release identifiers
+
+If a release has a long display name, add an `[id:: short-name]` field to the
+release heading. Stories then use the short id instead of the full name.
+storymap will warn if a release name contains spaces and has no `[id::]`.
+
+```markdown
+# Releases
+## Minimum Viable Product [id:: mvp]
+## Private Beta [id:: beta]
+
+# Map
+## User Management
+### Authentication
+#### Sign in [status:: done] [release:: mvp]
+#### SSO [status:: not-started] [release:: beta]
+```
+
+This decouples the display name from the identifier — you can rename the
+release heading freely without updating every story.
 
 ### Story fields
 
@@ -106,13 +123,13 @@ Stories support optional inline fields using `[key:: value]` syntax.
 Fields appear as badges on the rendered story card.
 
 ```markdown
-#### Story name [status:: done] [persona:: Margie the Manager] [deadline:: 2026-03-01] [release:: MVP]
+#### Story name [status:: done] [persona:: Margie the Manager] [deadline:: 2026-03-01] [release:: mvp]
 ```
 
 | Field | Values | Default |
 |---|---|---|
 | `status` | `not-started`, `in-progress`, `done`, `blocked` | `not-started` |
-| `release` | Release name from `# Releases` section | — |
+| `release` | Release name or id from `# Releases` section | — |
 | `persona` | Any string matching a persona name | — |
 | `deadline` | ISO date `YYYY-MM-DD` | — |
 
@@ -125,24 +142,13 @@ is treated as the story description. Descriptions support standard markdown:
 bold, italics, links, lists, and images.
 
 The first paragraph is always visible on the story card. Additional paragraphs
-(separated by a blank line) are shown only in Detail zoom level.
-
-```markdown
-#### Sign in [status:: done] [release:: MVP]
-User can log in with email and password.
-
-**Acceptance criteria:**
-- Given valid credentials, user is redirected to dashboard
-- Given invalid credentials, an error message is shown
-
-![wireframe](./screens/sign-in.png)
-```
+are shown only in Detail zoom level.
 
 ### Images
 
-Images in story descriptions and persona descriptions are embedded as base64
-data URIs in the output HTML, making the file fully self-contained. Paths are
-resolved relative to the source `.md` file. Remote URLs are left as-is.
+Images in story and persona descriptions are embedded as base64 data URIs in
+the output HTML, making the file fully self-contained. Paths are resolved
+relative to the source `.md` file. Remote URLs are left as-is.
 
 ## Interactive HTML features
 
@@ -151,15 +157,14 @@ The rendered HTML includes controls for navigating large maps:
 **Zoom levels** — three buttons in the sticky header:
 - **Overview** — story names only, compact layout
 - **Map** — story names, status badges, and first-paragraph descriptions
-- **Detail** — full descriptions and acceptance criteria expanded
+- **Detail** — full descriptions expanded
 
 **Release focus** — a dropdown to highlight one release swimlane and dim
 the rest. Works independently of the zoom level.
 
 **Story Lens** — a toggle that enables click-to-zoom on individual story cards.
-When active, clicking a card expands it to ~40% of the viewport width with full
-details visible. Clicking outside collapses it. Stories in the focused release
-(if any) are the only ones that can be expanded.
+When active, clicking a card expands it to ~40% of the viewport width. Clicking
+outside collapses it.
 
 ## CLI reference
 

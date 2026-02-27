@@ -23,8 +23,8 @@ render them to HTML with `storymap render <file>`.
 Optional description.
 
 # Releases        ← required, defines swimlane labels
-## Release 1
-## Release 2
+## MVP
+## Private Beta [id:: beta]   ← use [id::] when name has spaces
 
 # Personas        ← optional
 ## Persona Name
@@ -33,10 +33,10 @@ Description with markdown.
 # Map             ← required
 ## Activity       ← column group
 ### Task          ← column
-#### Story [status:: done] [persona:: Name] [release:: Release 1] [deadline:: YYYY-MM-DD]
+#### Story [status:: done] [persona:: Name] [release:: MVP] [deadline:: YYYY-MM-DD]
 Optional story description.
 
-#### Story in second swimlane [status:: not-started] [release:: Release 2]
+#### Story in beta [status:: not-started] [release:: beta]
 ```
 
 ## Rules
@@ -44,8 +44,10 @@ Optional story description.
 - `# Releases`, `# Personas`, `# Map` are reserved section names (case-insensitive)
 - Any other `#` heading becomes the document title (first one) or is passed through
 - Map hierarchy is strictly `##` Activity → `###` Task → `####` Story
-- Each story is assigned to a release swimlane via `[release:: Release Name]`
-- The `[release::]` value must exactly match a release name defined in `# Releases`
+- Each story is assigned to a release swimlane via `[release:: value]`
+- If a release has no `[id::]`, stories use the release name exactly
+- If a release has `[id:: slug]`, stories must use the slug — not the display name
+- Add `[id::]` whenever a release name contains spaces; omit it for short names like MVP
 - Stories without a `[release::]` field are parsed but not shown in any swimlane
 - Story names are short labels (a few words); put detail in the description body
 - Always add `[status:: ...]` to every story — it drives the card color in the HTML
@@ -60,6 +62,7 @@ Optional story description.
 4. If the user hasn't specified releases, default to two: `MVP` and `Next`
 5. If the user hasn't specified personas, omit the `# Personas` section
 6. Aim for 3–6 activities, 2–4 tasks per activity, 1–3 stories per task per release
+7. Use `[id::]` on releases with spaces in the name; skip it for short names
 
 ## Example
 
@@ -71,8 +74,8 @@ A simple app for individuals to manage daily tasks.
 ## MVP
 Core task management.
 
-## Beta
-Collaboration features.
+## Private Beta [id:: beta]
+Collaboration features with selected users.
 
 # Personas
 ## Sam the Solo User
@@ -86,14 +89,14 @@ Uses the app daily for personal and work tasks.
 #### Add a task [status:: done] [persona:: Sam the Solo User] [release:: MVP]
 Title and optional due date.
 
-#### Add subtasks [status:: not-started] [release:: Beta]
+#### Add subtasks [status:: not-started] [release:: beta]
 
 ### Complete Tasks
 #### Mark task as done [status:: done] [release:: MVP]
-#### Bulk complete [status:: not-started] [release:: Beta]
+#### Bulk complete [status:: not-started] [release:: beta]
 
 ## Sharing
 ### Collaboration
 #### Share task list [status:: not-started] [release:: MVP]
-#### Assign tasks [status:: not-started] [release:: Beta]
+#### Assign tasks [status:: not-started] [release:: beta]
 ```

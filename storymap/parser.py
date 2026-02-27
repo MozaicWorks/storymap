@@ -229,6 +229,12 @@ def _warn_unmatched_releases(doc: StorymapDocument) -> None:
                         f"Story '{story.name}': release '{r}' not found in "
                         "Releases section — story will not appear in any swimlane."
                     )
+    for release in doc.releases:
+        if release.id is None and " " in release.name:
+            doc.warnings.append(
+                f"Release '{release.name}' has spaces in its name and no [id::] field. "
+                "Consider adding [id:: short-name] to avoid issues when renaming."
+            )
 
 
 def _heading_content(tokens: list, heading_open_index: int) -> str:

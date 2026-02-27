@@ -28,14 +28,22 @@ Short description of what this product does and who it's for.
 
 Defines the release swimlanes. Each `##` heading is a release.
 
+For short release names (no spaces), no extra syntax is needed:
 ```markdown
 # Releases
 ## MVP
-Core functionality for the first public launch.
-
 ## Beta
-Invite-only beta with selected users.
 ```
+
+For longer names, add an `[id:: slug]` field. Stories then reference the slug
+instead of the full name — this decouples display name from identifier:
+```markdown
+# Releases
+## Minimum Viable Product [id:: mvp]
+## Private Beta [id:: beta]
+```
+
+storymap will warn if a release name contains spaces and has no `[id::]`.
 
 ### Personas section (optional)
 
@@ -60,22 +68,23 @@ The story map itself. Three levels of hierarchy:
 #### Story      — card in a release swimlane
 ```
 
-Each story is assigned to a release swimlane using the `[release:: name]` field.
-The name must exactly match a release defined in `# Releases`.
-Stories without a `[release::]` field are parsed but not shown in any swimlane.
+Each story is assigned to a release swimlane using `[release:: value]`. The
+value must match the release name exactly (for releases without an id) or the
+release id (for releases with `[id::]`). Stories without `[release::]` are
+parsed but not shown in any swimlane.
 
 ```markdown
 ## User Management
 ### Authentication
-#### Sign in [status:: done] [persona:: Alice the User] [release:: MVP]
+#### Sign in [status:: done] [persona:: Alice the User] [release:: mvp]
 User can log in with email and password.
 
-#### SSO login [status:: in-progress] [release:: Beta]
+#### SSO login [status:: in-progress] [release:: beta]
 Support Google and Microsoft OAuth.
 
 ### Profile
-#### Edit profile [status:: done] [release:: MVP]
-#### Upload avatar [status:: not-started] [release:: Beta]
+#### Edit profile [status:: done] [release:: mvp]
+#### Upload avatar [status:: not-started] [release:: beta]
 ```
 
 ### Story fields
@@ -86,7 +95,7 @@ Fields appear as badges on the rendered card.
 | Field | Values |
 |---|---|
 | `status` | `not-started`, `in-progress`, `done`, `blocked` |
-| `release` | Release name from `# Releases` section |
+| `release` | Release name or id from `# Releases` section |
 | `persona` | Any string matching a persona name |
 | `deadline` | ISO date `YYYY-MM-DD` |
 
@@ -96,7 +105,8 @@ Any other `[key:: value]` field is accepted and rendered as a badge.
 
 - Every task must have at least one story
 - Every activity must have at least one task
-- Every story must have a `[release:: name]` field matching a defined release
+- Every story should have a `[release::]` field — stories without one are invisible in the map
+- Use `[id::]` on any release whose name contains spaces; omit it for short names like MVP
 - Story names should be short (a few words) — put detail in the description
 - Use the `status` field on every story so the map is readable at a glance
 
@@ -110,7 +120,7 @@ A simple app for individuals to manage daily tasks.
 ## MVP
 Core task management — create, complete, delete.
 
-## Beta
+## Private Beta [id:: beta]
 Collaboration and sharing features.
 
 # Personas
@@ -124,16 +134,16 @@ Uses the app daily to manage personal and work tasks.
 #### Add a task [status:: done] [persona:: Sam the Solo User] [release:: MVP]
 User can create a task with a title and optional due date.
 
-#### Add subtasks [status:: not-started] [release:: Beta]
+#### Add subtasks [status:: not-started] [release:: beta]
 Break tasks into smaller steps.
 
 ### Complete Tasks
 #### Mark task as done [status:: done] [release:: MVP]
-#### Bulk complete [status:: not-started] [release:: Beta]
+#### Bulk complete [status:: not-started] [release:: beta]
 Select multiple tasks and mark them all done.
 
 ## Sharing
 ### Collaboration
 #### Share task list [status:: not-started] [deadline:: 2026-09-01] [release:: MVP]
-#### Assign tasks to others [status:: not-started] [release:: Beta]
+#### Assign tasks to others [status:: not-started] [release:: beta]
 ```
