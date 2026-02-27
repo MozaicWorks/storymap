@@ -193,6 +193,24 @@ class TestParserReleases:
         doc = StorymapParser().parse(src)
         assert doc.releases[0].description == ""
 
+    def test_release_id_field(self):
+        src = "# Releases\n## My Long Release Name [id:: mvp]\n\n# Map\n## A\n### T\n#### S\n"
+        doc = StorymapParser().parse(src)
+        assert doc.releases[0].name == "My Long Release Name"
+        assert doc.releases[0].id == "mvp"
+        assert doc.releases[0].key() == "mvp"
+
+    def test_release_without_id_uses_name_as_key(self):
+        src = "# Releases\n## MVP\n\n# Map\n## A\n### T\n#### S\n"
+        doc = StorymapParser().parse(src)
+        assert doc.releases[0].id is None
+        assert doc.releases[0].key() == "MVP"
+
+    def test_release_id_stripped_from_display_name(self):
+        src = "# Releases\n## Long Name [id:: short]\n\n# Map\n## A\n### T\n#### S\n"
+        doc = StorymapParser().parse(src)
+        assert "[id::" not in doc.releases[0].name
+
     def test_release_description_with_markdown(self):
         src = (
             "# Releases\n"
@@ -355,6 +373,26 @@ class TestParserReleaseField:
         doc = StorymapParser().parse(src)
         task = doc.activities[0].tasks[0]
         assert task.stories_for_release("Beta") == []
+
+    def test_stories_matched_by_release_id(self):
+        src = (
+            "# Releases\n## My Very Long Name [id:: mvp]\n\n"
+            "# Map\n## A\n### T\n"
+            "#### Story 1 [release:: mvp]\n"
+        )
+        doc = StorymapParser().parse(src)
+        task = doc.activities[0].tasks[0]
+        assert len(task.stories_for_release("mvp")) == 1
+        assert task.stories_for_release("My Very Long Name") == []
+
+    def test_unmatched_release_warns_against_id_not_name(self):
+        src = (
+            "# Releases\n## Long Name [id:: short]\n\n"
+            "# Map\n## A\n### T\n"
+            "#### Story 1 [release:: Long Name]\n"
+        )
+        doc = StorymapParser().parse(src)
+        assert any("Long Name" in w for w in doc.warnings)
 
 
 # ---------------------------------------------------------------------------

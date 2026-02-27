@@ -94,7 +94,26 @@ class TestStory:
 # ---------------------------------------------------------------------------
 
 
-class TestTask:
+class TestRelease:
+    def test_name_is_required(self):
+        r = Release(name="MVP")
+        assert r.name == "MVP"
+
+    def test_id_defaults_to_none(self):
+        r = Release(name="MVP")
+        assert r.id is None
+
+    def test_key_returns_name_when_no_id(self):
+        r = Release(name="MVP")
+        assert r.key() == "MVP"
+
+    def test_key_returns_id_when_set(self):
+        r = Release(name="My Very Long Release", id="mvp")
+        assert r.key() == "mvp"
+
+    def test_key_does_not_return_name_when_id_set(self):
+        r = Release(name="My Very Long Release", id="mvp")
+        assert r.key() != r.name
     def test_name_is_required(self):
         task = Task(name="Authentication")
         assert task.name == "Authentication"

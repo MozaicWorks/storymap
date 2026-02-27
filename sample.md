@@ -10,18 +10,18 @@ in the EU and US markets.
 [Product brief](https://docs.example.com/product-brief) · [Miro board](https://miro.com/board/acme)
 
 # Releases
-## Not Planned Yet
+## Not Planned Yet [id:: unplanned]
 Stories that have been identified but not yet assigned to a release.
 
-## MVP
+## MVP [id:: mvp]
 Core functionality required for the first public launch.
 Targets [Q2 2026 milestone](https://github.com/org/repo/milestone/1).
 
-## Beta
+## Beta [id:: beta]
 Invite-only beta with selected enterprise customers.
 Focuses on stability, onboarding, and feedback collection.
 
-## GA
+## GA [id:: ga]
 General availability release.
 Full feature set with polished UX and performance targets met.
 
@@ -90,17 +90,17 @@ Includes email verification flow.
 See [issue #12](https://github.com/org/repo/issues/12)
 
 
-#### Register via SSO [status:: in-progress] [persona:: Dave the Developer] [deadline:: 2026-04-15] [release:: MVP]
+#### Register via SSO [status:: in-progress] [persona:: Dave the Developer] [deadline:: 2026-04-15] [release:: mvp]
 Support Google and Microsoft OAuth providers.
 See [issue #34](https://github.com/org/repo/issues/34)
 
 
-#### Register via SAML [status:: not-started] [persona:: Margie the Manager] [deadline:: 2026-09-01] [release:: Beta]
+#### Register via SAML [status:: not-started] [persona:: Margie the Manager] [deadline:: 2026-09-01] [release:: beta]
 Enterprise SAML 2.0 support for large customers.
 
 ### Authentication
 
-#### Sign in [status:: done] [release:: Beta]
+#### Sign in [status:: done] [release:: beta]
 Standard email/password login with remember-me option.
 
 **Acceptance criteria:**
@@ -110,16 +110,16 @@ Standard email/password login with remember-me option.
 - Given 5 failed attempts, account is temporarily locked
 
 
-#### Forgot password [status:: done] [release:: GA]
+#### Forgot password [status:: done] [release:: ga]
 Password reset via email token.
 See [issue #15](https://github.com/org/repo/issues/15)
 
 
-#### MFA via TOTP [status:: in-progress] [deadline:: 2026-04-30] [release:: MVP]
+#### MFA via TOTP [status:: in-progress] [deadline:: 2026-04-30] [release:: mvp]
 Time-based one-time password support (Google Authenticator, Authy).
 
 
-#### MFA via SMS [status:: not-started] [deadline:: 2026-09-01] [release:: Beta]
+#### MFA via SMS [status:: not-started] [deadline:: 2026-09-01] [release:: beta]
 SMS-based one-time password as an alternative to TOTP.
 
 **Acceptance criteria:**
@@ -130,7 +130,7 @@ SMS-based one-time password as an alternative to TOTP.
 
 ### Profile
 
-#### View and edit profile [status:: done] [persona:: Nina the New User] [release:: Beta]
+#### View and edit profile [status:: done] [persona:: Nina the New User] [release:: beta]
 User can view and update their display name, email, and bio.
 
 **Acceptance criteria:**
@@ -139,12 +139,12 @@ User can view and update their display name, email, and bio.
 - Invalid fields show inline validation errors
 
 
-#### Upload avatar [status:: blocked] [persona:: Nina the New User] [release:: GA]
+#### Upload avatar [status:: blocked] [persona:: Nina the New User] [release:: ga]
 Blocked pending storage provider decision.
 See [JIRA-456](https://jira.example.com/browse/JIRA-456)
 
 
-#### Delete account [status:: not-started] [deadline:: 2026-09-01] [release:: MVP]
+#### Delete account [status:: not-started] [deadline:: 2026-09-01] [release:: mvp]
 Must comply with GDPR right-to-erasure requirements.
 See [issue #78](https://github.com/org/repo/issues/78)
 
@@ -152,51 +152,51 @@ See [issue #78](https://github.com/org/repo/issues/78)
 
 ### Dashboard
 
-#### View project summary [status:: done] [persona:: Margie the Manager] [release:: MVP]
+#### View project summary [status:: done] [persona:: Margie the Manager] [release:: mvp]
 High-level status cards showing release progress.
 
 
-#### Filter by release [status:: in-progress] [persona:: Margie the Manager] [deadline:: 2026-04-15] [release:: Beta]
+#### Filter by release [status:: in-progress] [persona:: Margie the Manager] [deadline:: 2026-04-15] [release:: beta]
 
 
-#### Filter by persona [status:: not-started] [deadline:: 2026-06-01] [release:: GA]
+#### Filter by persona [status:: not-started] [deadline:: 2026-06-01] [release:: ga]
 
-#### Filter by status [status:: not-started] [deadline:: 2026-06-01] [release:: GA]
+#### Filter by status [status:: not-started] [deadline:: 2026-06-01] [release:: ga]
 
 ### Export
 
-#### Export to PDF [status:: in-progress] [persona:: Margie the Manager] [deadline:: 2026-04-30] [release:: GA]
+#### Export to PDF [status:: in-progress] [persona:: Margie the Manager] [deadline:: 2026-04-30] [release:: ga]
 One-click PDF export of the current story map view.
 
 
-#### Export to CSV [status:: not-started] [persona:: Dave the Developer] [deadline:: 2026-06-01] [release:: MVP]
+#### Export to CSV [status:: not-started] [persona:: Dave the Developer] [deadline:: 2026-06-01] [release:: mvp]
 Machine-readable export for backlog import into Jira or GitHub.
 
 
-#### Export to PNG [status:: not-started] [deadline:: 2026-09-01] [release:: Beta]
+#### Export to PNG [status:: not-started] [deadline:: 2026-09-01] [release:: beta]
 
 ## Notifications
 
 ### Email Notifications
 
-#### Notify on story status change [status:: not-started] [persona:: Margie the Manager] [release:: Beta]
+#### Notify on story status change [status:: not-started] [persona:: Margie the Manager] [release:: beta]
 
 
-#### Daily digest [status:: not-started] [persona:: Margie the Manager] [deadline:: 2026-06-01] [release:: GA]
+#### Daily digest [status:: not-started] [persona:: Margie the Manager] [deadline:: 2026-06-01] [release:: ga]
 Optional daily summary email of changes since last digest.
 
 
-#### Notify on blocked stories [status:: not-started] [deadline:: 2026-09-01] [release:: MVP]
+#### Notify on blocked stories [status:: not-started] [deadline:: 2026-09-01] [release:: mvp]
 Alert assigned persona when a story is marked as blocked.
 
 ### In-app Notifications
 
-#### Show notification badge [status:: blocked] [release:: MVP]
+#### Show notification badge [status:: blocked] [release:: mvp]
 Blocked by front-end architecture decision on state management.
 See [issue #99](https://github.com/org/repo/issues/99)
 
 
-#### Mark notifications as read [status:: not-started] [deadline:: 2026-06-01] [release:: Beta]
+#### Mark notifications as read [status:: not-started] [deadline:: 2026-06-01] [release:: beta]
 
 
-#### Notification preferences [status:: not-started] [deadline:: 2026-09-01] [release:: GA]
+#### Notification preferences [status:: not-started] [deadline:: 2026-09-01] [release:: ga]

@@ -157,7 +157,11 @@ class StorymapParser:
                 elif level == 2:
                     if section == _Section.RELEASES:
                         finalize_release(token_start)
-                        current_release = Release(name=content.strip())
+                        rel_name, rel_fields = _parse_story_heading(content.strip())
+                        current_release = Release(
+                            name=rel_name,
+                            id=rel_fields.get("id") or None,
+                        )
                         desc_start = token_end
 
                     elif section == _Section.PERSONAS:
@@ -214,13 +218,13 @@ class StorymapParser:
 
 
 def _warn_unmatched_releases(doc: StorymapDocument) -> None:
-    """Warn about stories whose [release::] value doesn't match any release."""
-    release_names = {r.name for r in doc.releases}
+    """Warn about stories whose [release::] value doesn't match any release key."""
+    release_keys = {r.key() for r in doc.releases}
     for activity in doc.activities:
         for task in activity.tasks:
             for story in task.stories:
                 r = story.release()
-                if r is not None and r not in release_names:
+                if r is not None and r not in release_keys:
                     doc.warnings.append(
                         f"Story '{story.name}': release '{r}' not found in "
                         "Releases section — story will not appear in any swimlane."

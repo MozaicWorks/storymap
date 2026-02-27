@@ -611,7 +611,7 @@
         {% for activity in document.activities %}
           {% for task in activity.tasks %}
           <td class="story-cell {% if loop.last %}activity-last-task{% endif %}">
-            {% for story in task.stories_for_release(release.name) %}
+            {% for story in task.stories_for_release(release.key()) %}
             {% set story_color = story.status_color(status_colors) %}
             <div class="story-card" style="background: {{ story_color }}; border-left-color: {{ story_color | darken }};">
               <div class="story-name">{{ story.name }}</div>

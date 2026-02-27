@@ -65,9 +65,9 @@ class Task:
     name: str
     stories: list[Story] = field(default_factory=list)
 
-    def stories_for_release(self, release_name: str) -> list[Story]:
-        """Return stories assigned to the given release name."""
-        return [s for s in self.stories if s.release() == release_name]
+    def stories_for_release(self, release_key: str) -> list[Story]:
+        """Return stories assigned to the given release key."""
+        return [s for s in self.stories if s.release() == release_key]
 
     def unassigned_stories(self) -> list[Story]:
         """Return stories with no release field."""
@@ -84,10 +84,19 @@ class Activity:
 
 @dataclass
 class Release:
-    """A release/swimlane with an optional markdown description."""
+    """A release/swimlane with an optional markdown description.
+
+    If id is set, stories must use that value in [release:: id].
+    If id is not set, stories use the release name directly.
+    """
 
     name: str
     description: str = ""
+    id: str | None = None
+
+    def key(self) -> str:
+        """The identifier used in [release:: ...] story fields."""
+        return self.id if self.id is not None else self.name
 
 
 @dataclass
