@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "storymap"
-version = "0.1.3"
+version = "0.1.4"
 description = "Generate user story maps from markdown"
 readme = "README.md"
 license = "MIT"
